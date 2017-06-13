@@ -18,6 +18,7 @@ package org.anyframe.xp.query.impl;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.anyframe.query.QueryInfo;
@@ -38,6 +39,7 @@ import org.anyframe.xp.query.impl.jdbc.setter.XPDataSetSQLParameterSource.Column
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContextAware;
 
 import com.tobesoft.xplatform.data.DataSet;
 import com.tobesoft.xplatform.data.DataSetList;
@@ -48,7 +50,7 @@ import com.tobesoft.xplatform.data.VariableList;
  * @author Soyon Lim
  */
 public class XPQueryServiceImpl extends AbstractRiaQueryService implements
-		XPQueryService, InitializingBean {
+		XPQueryService, ApplicationContextAware, InitializingBean {
 
 	public RiaRowCallback getRowCallbackHandler() {
 		return null;
@@ -144,7 +146,8 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements
 			pageSize = dataSet.getInt(0, "pageSize");
 		} catch (Exception e) {
 			if (e instanceof NullPointerException) {
-				throw new QueryServiceException("Query Service : there is no parameter for paging, \"pageIndex\" or \"pageSize\" must be null.");
+				throw new QueryServiceException(messageSource,
+						"error.riaquery.get.page.info");
 			}
 		}
 
@@ -350,15 +353,19 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements
 			}
 		} catch (Exception e) {
 			Log LOGGER = LogFactory.getLog(XPQueryService.class);
-    		if( e instanceof NullPointerException ){
-    			if(LOGGER.isDebugEnabled()){
-    				LOGGER.debug("Query Service : cannot find '" + columnName +" ' column in Data.");
-    			}
-    		}else{
-    			if(LOGGER.isDebugEnabled()){
-    				LOGGER.debug( e.getMessage() );
-    			}
-    		}
+			if (e instanceof NullPointerException) {
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug(messageSource.getMessage(
+							"error.riaquery.get.value.null",
+							new Object[] { columnName }, Locale.getDefault()));
+				}
+			} else {
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug(messageSource.getMessage(
+							"error.riaquery.get.value", new Object[] { e
+									.getMessage() }, Locale.getDefault()));
+				}
+			}
 		}
 		return dataSet.getObject(rowNum, columnName);
 	}
