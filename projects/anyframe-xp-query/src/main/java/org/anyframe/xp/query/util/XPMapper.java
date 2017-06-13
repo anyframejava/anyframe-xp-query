@@ -448,7 +448,7 @@ public class XPMapper {
 			type = DataTypes.DOUBLE;
 		} else if (t.equals(BigDecimal.class.getName())) {
 			type = DataTypes.BIG_DECIMAL;
-		} else if (t.equals(Date.class.getName())) {
+		} else if (t.equals(Date.class.getName()) || t.equals(java.sql.Date.class.getName())) {
 			type = DataTypes.DATE_TIME;
 		} else if (t.equals(byte[].class.getName())) {
 			type = DataTypes.BLOB;

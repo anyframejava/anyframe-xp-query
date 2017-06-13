@@ -11,24 +11,24 @@
 	</parent>
 <groupId>org.anyframe</groupId>
 	<artifactId>anyframe-xp-query</artifactId>
-	<version>1.0.1</version>		
+	<version>1.0.2</version>		
 	<packaging>jar</packaging>	
 
 	<dependencies>
 		<dependency>
 			<groupId>org.anyframe</groupId>
 			<artifactId>anyframe-core</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.3</version>
 		</dependency>	
 		<dependency>
 			<groupId>org.anyframe</groupId>
 			<artifactId>anyframe-query</artifactId>
-			<version>1.1.0</version>
+			<version>1.1.2</version>
 		</dependency>	
 		<dependency>
 			<groupId>org.anyframe</groupId>
 			<artifactId>anyframe-query-ria</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 			<dependency>
 			<groupId>javax.servlet</groupId>
@@ -36,11 +36,13 @@
 			<version>2.1</version>
 			<scope>provided</scope>
 		</dependency>	
+		<!-- 
 		<dependency>
 			<groupId>avalon</groupId>
 			<artifactId>avalon-framework</artifactId>
 			<version>4.0</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
@@ -80,6 +82,7 @@
   			<groupId>xplatform</groupId>
   			<artifactId>xplatform-api</artifactId>
   			<version>1.0</version>
+  			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -166,6 +169,7 @@
 			<groupId>net.sf</groupId>
 			<artifactId>log4jdbc3</artifactId>
 			<version>1.2beta2</version>
+			<scope>provided</scope>
 		</dependency>			
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -140,16 +140,27 @@ public class VariableListPropertyValues extends MutablePropertyValues {
 		for(int i=0;i<columnCount;i++){
 			columnHeader = dataList.getColumn(i);
 			key = columnHeader.getName();
-			type = columnHeader.getType();
+			// 2011.08.17 - change to getDataType
+			//type = columnHeader.getType();
+			type = columnHeader.getDataType();
 			
 			if (isDeleted) 
 				value = dataList.getRemovedData(rowNum, key);
 			else {
 				switch(type) {
-					case DataTypes.DATE : value = dataList.getDateTime(rowNum, key); break;
+					// 2011.08.17 - add & change
+					case DataTypes.STRING : value = dataList.getString(rowNum, key); break;
 					case DataTypes.BIG_DECIMAL : value = dataList.getBigDecimal(rowNum, key); break;
 					case DataTypes.INT : value = dataList.getInt(rowNum, key); break;
-					default : value = dataList.getString(rowNum, key);
+					case DataTypes.DATE : value = dataList.getDateTime(rowNum, key); break;
+					case DataTypes.LONG : value = dataList.getLong(rowNum, key); break;
+					case DataTypes.FLOAT : value = dataList.getFloat(rowNum, key); break;
+					case DataTypes.DOUBLE : value = dataList.getDouble(rowNum, key); break;
+					case DataTypes.DATE_TIME : value = dataList.getDateTime(rowNum, key); break;
+					case DataTypes.BLOB : value = dataList.getBlob(rowNum, key); break;
+					case DataTypes.BOOLEAN : value = dataList.getBoolean(rowNum, key); break;
+					case DataTypes.TIME : value = dataList.getDateTime(rowNum, key); break;
+					default : value = dataList.getObject(rowNum, key);
 				}
 			}
 			returnMap.put(convertToCamelCase(key, convertToCamelCase), value);
