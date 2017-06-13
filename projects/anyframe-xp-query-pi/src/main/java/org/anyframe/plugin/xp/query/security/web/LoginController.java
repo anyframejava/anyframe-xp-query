@@ -50,9 +50,7 @@ public class LoginController extends AbstractXPController {
 			
 			outDl.set(0, gdsUser);
 		} catch(Exception e){
-			if(logger.isDebugEnabled()){
-				logger.debug(e.getMessage());
-			}
+			logger.debug(e.getMessage());
 			throw e;
 		}
 	}

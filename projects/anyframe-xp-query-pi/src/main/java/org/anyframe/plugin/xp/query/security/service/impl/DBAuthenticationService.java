@@ -53,8 +53,8 @@ public class DBAuthenticationService extends XPServiceImpl implements Authentica
 			outDs.setName("gdsUser");
 			outDl.add(outDs);
 		} catch(Exception e){
-			logger.error(e.getCause());
-			throw new Exception("Fail to process client request");
+			logger.error(e.getMessage(), e.getCause());
+			throw e;
 		}
 	}
 }

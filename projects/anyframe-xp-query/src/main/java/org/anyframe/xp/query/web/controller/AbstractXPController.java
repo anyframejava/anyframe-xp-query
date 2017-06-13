@@ -18,8 +18,8 @@ package org.anyframe.xp.query.web.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -54,7 +54,7 @@ public abstract class AbstractXPController extends AbstractController {
 	 */
 	private String contentType = PlatformType.CONTENT_TYPE_XML; // Default - XML
 	
-	protected Log logger=LogFactory.getLog(AbstractXPController.class);
+	protected Logger logger=LoggerFactory.getLogger(AbstractXPController.class);
 	
 	private String charset = PlatformType.DEFAULT_CHAR_SET; // Default CharSet = utf - 8
 
@@ -94,7 +94,7 @@ public abstract class AbstractXPController extends AbstractController {
 	 */
 	public ModelAndView handleRequestInternal(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		logger.debug(this.getClass().getName() + " process() Started!");
+		logger.debug("{} process() Started!", new Object[]{this.getClass().getName()});
 		VariableList inVl = null;
 		DataSetList inDl = null;
 		VariableList outVl = null;
@@ -113,17 +113,17 @@ public abstract class AbstractXPController extends AbstractController {
 			outVl = new VariableList();
 			outDl = new DataSetList();
 
-			if( logger.isDebugEnabled() ){
-				logger.debug(
-						this.getClass().getName() + "." + "operate()" + " started");
-			}
+			
+			logger.debug("{}.operate() started", new Object[] { this.getClass()
+					.getName() });
+			
 			
 			operate(httpPlatformRequest, inVl, inDl, outVl, outDl);
 			
-			if( logger.isDebugEnabled() ){
-				logger.debug(
-						this.getClass().getName() + "." + "operate()" + " ended");
-			}
+			
+			logger.debug("{}.operate() ended", new Object[] { this.getClass()
+					.getName() });
+			
 			setResultMessage(outVl, 0, "save successed");
 
 		} catch (Exception e) {
@@ -141,7 +141,8 @@ public abstract class AbstractXPController extends AbstractController {
 			httpPlatformResponse.setData(outPlatformData);
 			httpPlatformResponse.sendData();
 		}
-		logger.debug(this.getClass().getName() + " process() end!");
+		logger.debug("{} process() end!", new Object[] { this.getClass()
+				.getName() });
 		return null;
 	}
 

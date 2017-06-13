@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<plugin name="xp-query"
-	description="XP-Query Plugin consists of sample code that provides basic guidelines on how to use XPlatform connection modules and common server modules provided by Anyframe, and reference libraries needed to use open sources.">
+<plugin name="xp-query" description="XP-Query Plugin consists of sample code that provides basic guidelines on how to use XPlatform connection modules and common server modules provided by Anyframe, and reference libraries needed to use open sources.">
 	<groupId>org.anyframe.plugin</groupId>
 	<artifactId>anyframe-xp-query-pi</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<dependent-plugins>
 		<dependent-plugin name="query-ria" version="2.0.0&gt;*" />
 	</dependent-plugins>
 	<resources>
 		<resource dir="src/main/java" filtered="true" packaged="true">
-			<include name="**/*.java" />
+			<include name="**/xp/query/**/*.java" />
 		</resource>
 		<resource dir="src/main/resources" filtered="true" packaged="false">
 			<include name="**/*.xml" />
+			<exclude name="**/spring/context-transaction.xml" />
 		</resource>
 		<resource dir="src/test/java" filtered="true" packaged="true">
 			<include name="**/*.java" />
@@ -35,11 +35,14 @@
 	<build>
 		<filesets>
 			<fileset dir="src/main/java" filtered="true" packaged="true">
-				<include name="**/org/anyframe/plugin/xp/query/**/*.java" />
+				<include name="**/xp/query/**/*.java" />
+				<include name="org/anyframe/plugin/common/aspect/LoggingAspect.java" />
 			</fileset>
 			<fileset dir="src/main/resources" filtered="true" packaged="false">
+			    <include name="**/spring/context-transaction.xml" />
 				<include name="**/*xp-query*.xml" />
 				<include name="**/xp-query/**/*.xml" />
+				<include name="**/xp-query-generation-servlet.xml"/>
 				<include name="**/*License.xml" />
 			</fileset>
 			<fileset dir="src/test/java" filtered="true" packaged="true">

@@ -44,36 +44,118 @@ public class XPDao {
 		this.xpQueryService = xpQueryService;
 	}
 	
+	/**
+     * This is the method for selecting using primary key(String).
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param primaryKey
+     * 		primary key value
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public DataSet get(String queryId, String primaryKey) throws Exception{
 		VariableList inVl = new VariableList();
 		inVl.add("primaryKey", primaryKey);
 		return xpQueryService.search(queryId, inVl);
 	}
 	
+	/**
+     * This is the method for selecting using VariableList.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inVl
+     * 		VariableList contains key word to search.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public DataSet get(String queryId, VariableList inVl) throws Exception {
 		return xpQueryService.search(queryId, inVl);
 	}
 	
+	/**
+     * This is the method for selecting using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains key word to search.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */ 
 	public DataSet getList(String queryId, DataSet inDs) throws Exception {
 		return xpQueryService.search(queryId, inDs);
 	}
 
+	/**
+     * This is the method for selecting using VariableList.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inVl
+     * 		VariableList contains key word to search.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public DataSet getList(String queryId, VariableList inVl) throws Exception {
 		return xpQueryService.search(queryId, inVl);
 	}
 
+	/**
+     * This is the method for selecting using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains key word to search and pageIndex, pageUnit.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public DataSet getPagingList(String queryId, DataSet inDs) throws Exception {
 		return xpQueryService.searchWithPaging(queryId, inDs);
 	}
 	
+	/**
+     * This is the method for inserting using VariableList.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inVl
+     * 		VariableList contains record to insert.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public int create(String queryId, VariableList inVl) throws Exception {
 		return xpQueryService.update(queryId, inVl);
 	}
 	
+	/**
+     * This is the method for inserting using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains records to insert.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public int create(String queryId, DataSet inDs) throws Exception {
 		return create(queryId, inDs, null);
 	}
 
+	/**
+     * This is the method for inserting using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains records to insert.
+     * @param actionCommand
+     * 		XPActionCommand contains biz. logic pre or post insert. 
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public int create(String queryId, DataSet inDs, XPActionCommand actionCommand) throws Exception {
 		Map<String, String> queryMap = new HashMap<String, String>();
 		setDataSetStatus(TYPE_INSERT, inDs);
@@ -81,14 +163,46 @@ public class XPDao {
 		return saveAll(queryMap, inDs, actionCommand);
 	}
 	
+	/**
+     * This is the method for removing using VariableList.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inVl
+     * 		VariableList contains record to remove.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */ 
 	public int remove(String queryId, VariableList inVl) throws Exception {
 		return xpQueryService.update(queryId, inVl);
 	}
 
+	/**
+     * This is the method for removing using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains records to remove.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */
 	public int remove(String queryId, DataSet inDs) throws Exception {
 		return remove(queryId, inDs, null);
 	}
 
+	/**
+     * This is the method for removing using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains records to remove.
+     * @param actionCommand
+     * 		XPActionCommand contains biz. logic pre or post remove. 
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public int remove(String queryId, DataSet inDs, XPActionCommand actionCommand) throws Exception {
 		Map<String, String> queryMap = new HashMap<String, String>();
 		setDataSetStatus(TYPE_DELETE, inDs);
@@ -96,14 +210,46 @@ public class XPDao {
 		return saveAll(queryMap, inDs, actionCommand);
 	}
 
+	/**
+     * This is the method for updating using VariableList.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inVl
+     * 		VariableList contains record to update.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public int update(String queryId, VariableList inVl) throws Exception {
 		return xpQueryService.update(queryId, inVl);
 	}
 
+	/**
+     * This is the method for updating using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains records to update.
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */
 	public int update(String queryId, DataSet inDs) throws Exception {
 		return update(queryId, inDs, null);
 	}
 
+	/**
+     * This is the method for updating using Dataset.
+     * @param queryId
+     * 		query id to execute in query mapping file.
+     * @param inDs
+     * 		Dataset contains records to update.
+     * @param actionCommand
+     * 		XPActionCommand contains biz. logic pre or post update. 
+	 * @throws Exception
+	 *		if there is any problem executing the
+	 *		query
+     */  
 	public int update(String queryId, DataSet inDs, XPActionCommand actionCommand) throws Exception {
 		Map<String, String> queryMap = new HashMap<String, String>();
 		setDataSetStatus(TYPE_UPDATE, inDs);
@@ -111,10 +257,30 @@ public class XPDao {
 		return saveAll(queryMap, inDs, actionCommand);
 	}
 	
+	/**
+	 * This is the method for save(insert, update, delete) using Dataset.
+	 * @param queryMap
+	 * 		Three query ids for insert, update, and delete in query mapping file. 
+	 * @param inDs
+	 * 		Dataset contains records to insert, update, delete.
+	 * @return
+	 * @throws Exception
+	 */
 	public int saveAll(Map<String, String> queryMap, DataSet inDs) throws Exception {
 		return saveAll(queryMap, inDs, null);
 	}
 
+	/**
+	 * This is the method for save(insert, update, delete) using Dataset.
+	 * @param queryMap
+	 * 			Three query ids for insert, update, and delete in query mapping file. 
+	 * @param inDs
+	 * 			Dataset contains records to insert, update, delete.
+	 * @param actionCommand
+	 * 			XPActionCommand contains biz. logic pre or post insert, update, delete. 
+	 * @return
+	 * @throws Exception
+	 */
 	public int saveAll(Map<String, String> queryMap, DataSet inDs, XPActionCommand actionCommand) throws Exception {
 		if (actionCommand == null) {
 			return xpQueryService.update(queryMap, inDs);
@@ -123,7 +289,18 @@ public class XPDao {
 			return xpQueryService.update(queryMap, inDs, actionCommand);
 		}
 	}
-
+	
+	/**
+	 * This is the method for callablestatement using Dataset.
+	 * @param queryMap
+	 * 			Three query ids for insert, update, and delete in query mapping file. 
+	 * @param inDs
+	 * 			Dataset contains records to insert, update, delete.
+	 * @param actionCommand
+	 * 			XPActionCommand contains biz. logic pre or post insert, update, delete. 
+	 * @return
+	 * @throws Exception
+	 */
 	public DataSetList execute(String queryId, DataSet inDs) throws Exception {
 		return xpQueryService.execute(queryId, inDs);
 	}

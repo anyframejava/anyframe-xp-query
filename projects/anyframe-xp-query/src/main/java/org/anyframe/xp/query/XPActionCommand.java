@@ -20,11 +20,11 @@ import com.tobesoft.xplatform.data.DataSet;
 /**
  * This is an interface class for adding the business logic before/after
  * manipulating the database at XPQueryService use. Recommand to use
- * IXPQueryService for manipulating the database in developing the presentation
+ * XPQueryService for manipulating the database in developing the presentation
  * layer using the XPlatform which is a X-internet solution of the TOBE
  * Software company. When we change the DataSet's value which is XPlatform's
  * data format, we add the needed logic for implementation class of
- * IXPActionCommand's class.
+ * XPActionCommand's class.
  * @author Soyon Lim
  * @author JongHoon Kim
  */

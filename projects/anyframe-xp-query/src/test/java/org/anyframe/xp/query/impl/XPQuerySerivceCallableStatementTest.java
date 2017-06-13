@@ -20,10 +20,17 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
+import junit.framework.Assert;
+
 import org.anyframe.xp.query.XPQueryService;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.tobesoft.xplatform.data.DataSet;
 import com.tobesoft.xplatform.data.DataSetList;
@@ -45,29 +52,21 @@ import com.tobesoft.xplatform.data.DataTypes;
  * 
  * @author Jonghoon Kim
  */
-public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:/spring/context-*.xml" })
+public class XPQuerySerivceCallableStatementTest {
 
+	@Inject
 	private XPQueryService xpQueryService;
 
-	public void setXpQueryService(XPQueryService xpQueryService) {
-		this.xpQueryService = xpQueryService;
-	}
-
+	@Inject
 	private DataSource dataSource = null;
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	protected String[] getConfigLocations() {
-		setAutowireMode(AbstractDependencyInjectionSpringContextTests.AUTOWIRE_BY_NAME);
-		return new String[] { "classpath:/spring/context-*.xml" };
-	}
 
 	/**
 	 * 테스트를 위해 Function FUNC_RETURN_NUM, Procedure PROC_TOCHAR_SYSDATE, PACKAGE
 	 * PKG_REFCURSOR_TEST를 생성한다.
 	 */
+	@Before
 	public void onSetUp() throws Exception {
 		Connection conn = null;
 		Statement statement = null;
@@ -147,7 +146,7 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 		}
 		catch (SQLException e) {
 			System.err.println("Unable to initialize database for test." + e);
-			fail("Unable to initialize database for test. " + e);
+			Assert.fail("Unable to initialize database for test. " + e);
 		}
 		finally {
 			if (statement != null)
@@ -164,6 +163,7 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 	 * 
 	 * @throws Exception throws exception which is from QueryService
 	 */
+	@Test
 	public void testFunction() throws Exception {
 		// 1. set data for test
 
@@ -177,9 +177,9 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 		DataSet outDs = outDl.get("callFunction0");
 
 		// 3 assert
-		assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
-		assertEquals("Fail to compare class type of outVal.", DataTypes.BIG_DECIMAL, outDs.getColumn(0).getDataType());
-		assertTrue("Fail to execute function.", outDs.getDouble(0, "outVal") == 1.0);
+		Assert.assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
+		Assert.assertEquals("Fail to compare class type of outVal.", DataTypes.BIG_DECIMAL, outDs.getColumn(0).getDataType());
+		Assert.assertTrue("Fail to execute function.", outDs.getDouble(0, "outVal") == 1.0);
 	}
 
 	/**
@@ -189,6 +189,7 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 	 * 
 	 * @throws Exception throws exception which is from QueryService
 	 */
+	@Test
 	public void testProcedure() throws Exception {
 		// 1. set data for test
 		DataSet inDs = new DataSet("test");
@@ -203,10 +204,10 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 		DataSet outDs = outDl.get("callProcedure0");
 		
 		// 3. assert
-		assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
-		assertEquals("Fail to compare class type of outVal.", DataTypes.STRING, outDs.getColumn(0).getDataType());
+		Assert.assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
+		Assert.assertEquals("Fail to compare class type of outVal.", DataTypes.STRING, outDs.getColumn(0).getDataType());
 
-		assertEquals("Anyframe XPQueryService Procedure Test", outDs.getString(0, "outVal"));
+		Assert.assertEquals("Anyframe XPQueryService Procedure Test", outDs.getString(0, "outVal"));
 	}
 
 	/**
@@ -216,6 +217,7 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 	 * 
 	 * @throws Exception throws exception which is from QueryService
 	 */
+	@Test
 	public void testPackage() throws Exception {
 		// 1. set data for test
 		DataSet inDs = new DataSet("test1");
@@ -233,26 +235,26 @@ public class XPQuerySerivceCallableStatementTest extends AbstractDependencyInjec
 		DataSet outDs2 = outDl.get("callPackage1");
 		
 		// 3. assert
-		assertEquals("Fail to compare result size.", 3, outDs1.getRowCount());
-		assertEquals("Fail to compare result size.", 1, outDs2.getRowCount());
+		Assert.assertEquals("Fail to compare result size.", 3, outDs1.getRowCount());
+		Assert.assertEquals("Fail to compare result size.", 1, outDs2.getRowCount());
 
 		// 4. assert in detail
 		for (int i = 0; i < outDs1.getRowCount(); i++) {
 
-			assertEquals("Fail to compare a value of NAME column.", "KKN", outDs1.getString(i, "NAME"));
+			Assert.assertEquals("Fail to compare a value of NAME column.", "KKN", outDs1.getString(i, "NAME"));
 			if (i == 0)
-				assertEquals("Fail to compare a value of STATUS column.", "ACTIVE", outDs1.getString(i, "STATUS"));
+				Assert.assertEquals("Fail to compare a value of STATUS column.", "ACTIVE", outDs1.getString(i, "STATUS"));
 			else if (i == 1)
-				assertEquals("Fail to compare a value of STATUS column.", "READY", outDs1.getString(i, "STATUS"));
+				Assert.assertEquals("Fail to compare a value of STATUS column.", "READY", outDs1.getString(i, "STATUS"));
 			else if (i == 2)
-				assertEquals("Fail to compare a value of STATUS column.", "BLOCK", outDs1.getString(i, "STATUS"));
+				Assert.assertEquals("Fail to compare a value of STATUS column.", "BLOCK", outDs1.getString(i, "STATUS"));
 		}
 
 		// 5. assert in detail
 		for (int i = 0; i < outDs2.getRowCount(); i++) {
 
-			assertEquals("Fail to compare a value of NAME column.", "N/A", outDs2.getString(i, "NAME"));
-			assertEquals("Fail to compare a value of STATUS column.", "BLOCK", outDs2.getString(i, "STATUS"));
+			Assert.assertEquals("Fail to compare a value of NAME column.", "N/A", outDs2.getString(i, "NAME"));
+			Assert.assertEquals("Fail to compare a value of STATUS column.", "BLOCK", outDs2.getString(i, "STATUS"));
 		}
 	}
 }

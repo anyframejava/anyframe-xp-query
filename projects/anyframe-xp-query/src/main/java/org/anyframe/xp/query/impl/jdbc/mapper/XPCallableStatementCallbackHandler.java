@@ -42,8 +42,11 @@ public class XPCallableStatementCallbackHandler extends XPCallbackSupport
 	}
 
 	private ArrayList<SqlOutParameter> sqlParams;
+	
+	@SuppressWarnings("unused")
 	private LobHandler lobHandler;
 
+	@SuppressWarnings("unchecked")
 	public void setSQLParams(ArrayList sqlParams) {
 		this.sqlParams = sqlParams;
 	}
@@ -64,9 +67,8 @@ public class XPCallableStatementCallbackHandler extends XPCallbackSupport
 				int sqlType = outParams.getSqlType();
 				String paramName = outParams.getName();
 
-				if (sqlType == this.CUSOR) {
+				if (sqlType == XPCallableStatementCallbackHandler.CUSOR) {
 					rs = (ResultSet) cs.getObject(i + 1);
-					ResultSetMetaData rsMeta = rs.getMetaData();
 					dataset = setResultDataSet(paramName, rs);
 				}
 				else {

@@ -16,7 +16,7 @@
 /**
  * Provides service class to send query with given DataSets & Variables
  * 
- * @since 4.2.0
+ * @since 1.0.0
  */
 package org.anyframe.xp.query.service;
 

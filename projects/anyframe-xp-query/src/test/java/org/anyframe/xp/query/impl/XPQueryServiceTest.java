@@ -23,13 +23,20 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
+
+import junit.framework.Assert;
 
 import org.anyframe.query.QueryServiceException;
 import org.anyframe.util.DateUtil;
 import org.anyframe.xp.query.XPActionCommand;
 import org.anyframe.xp.query.XPQueryService;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.tobesoft.xplatform.data.DataSet;
 import com.tobesoft.xplatform.data.DataTypes;
@@ -61,33 +68,23 @@ import com.tobesoft.xplatform.data.VariableList;
  * </ul>
  * @author JongHoon Kim
  */
-public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContextTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:/spring/context-*.xml" })
+public class XPQueryServiceTest {
 	private final static String DATE_PATTERN = "yyyy-MM-dd";
 
+	@Inject
 	private DataSource dataSource;
-
+	
+	@Inject
 	private XPQueryService xpQueryService;
-
-	/**
-	 * Spring Configuration 파일을 읽는다.
-	 */
-	protected String[] getConfigLocations() {
-		return new String[] { "classpath:/spring/context-*.xml" };
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	public void setXpQueryService(XPQueryService xpQueryService) {
-		this.xpQueryService = xpQueryService;
-	}
 
 	/**
 	 * 테스트를 위한 기본 테이블 생성 및 기본 데이터 입력
 	 */
+	@Before
 	public void onSetUp() throws Exception {
-		super.onSetUp();
+		
 		try {
 			Connection conn = dataSource.getConnection();
 			try {
@@ -110,7 +107,7 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 		}
 		catch (SQLException e) {
 			System.err.println("Unable to initialize database for test." + e);
-			fail("Unable to initialize database for test. " + e);
+			Assert.fail("Unable to initialize database for test. " + e);
 		}
 	}
 
@@ -121,13 +118,14 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testUpdateDataSet() throws Exception {
 		insertDataSet();
 
-		Map queryMap = new HashMap();
+		Map<String, Object> queryMap = new HashMap<String, Object>();
 		queryMap.put(XPQueryService.QUERY_UPDATE, "updateXPQueryService");
 		int resultUpdate = xpQueryService.update(queryMap, makeUpdateDataSet());
-		assertEquals(1, resultUpdate);
+		Assert.assertEquals(1, resultUpdate);
 
 		DataSet resultDataSet = findDataSet("bbnydory00");
 
@@ -141,15 +139,16 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testProcessAllDataSet() throws Exception {
 		insertDataSet();
 
-		Map queryMap = new HashMap();
+		Map<String, Object> queryMap = new HashMap<String, Object>();
 		queryMap.put(XPQueryService.QUERY_UPDATE, "updateXPQueryService");
 		queryMap.put(XPQueryService.QUERY_INSERT, "createXPQueryService");
 		queryMap.put(XPQueryService.QUERY_DELETE, "deleteXPQueryService");
 		int resultUpdate = xpQueryService.update(queryMap, makeAllDataSet());
-		assertEquals("Fail to process all.", 3, resultUpdate);
+		Assert.assertEquals("Fail to process all.", 3, resultUpdate);
 
 		findListDataSet(5);
 
@@ -165,10 +164,11 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testProcessAllDataSetWithActionCommand() throws Exception {
 		insertDataSet();
 
-		Map queryMap = new HashMap();
+		Map<String, Object> queryMap = new HashMap<String, Object>();
 		queryMap.put(XPQueryService.QUERY_INSERT, "createXPQueryService");
 		queryMap.put(XPQueryService.QUERY_UPDATE, "updateXPQueryService");
 		queryMap.put(XPQueryService.QUERY_DELETE, "deleteXPQueryService");
@@ -193,7 +193,7 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 			public void preUpdate(DataSet record, int currentRow) {
 			}
 		});
-		assertEquals("Fail to process all with ActionCommand.", 3, resultUpdate);
+		Assert.assertEquals("Fail to process all with ActionCommand.", 3, resultUpdate);
 
 		DataSet resultDataSet = findDataSet("bbnydory88");
 
@@ -206,11 +206,12 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testFindDataSetWithVariant() throws Exception {
 		insertDataSet();
 
 		DataSet resultDataSet = xpQueryService.search("findXPQueryService", makeVariantList());
-		assertEquals(1, resultDataSet.getRowCount());
+		Assert.assertEquals(1, resultDataSet.getRowCount());
 
 		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678, 1234.5678, "Anyframe XPQueryService Test.");
 	}
@@ -221,14 +222,15 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testFindDataSetWithWrongQueryId() throws QueryServiceException {
 		try {
 			xpQueryService.search("notexistqueryid", makeVariantList());
-			fail("Fail to throw exception.");
+			Assert.fail("Fail to throw exception.");
 		}
 		catch (Exception e) {
-			assertTrue("Fail to check exception.", e instanceof QueryServiceException);
-			assertEquals("Fail to compare exception message.",
+			Assert.assertTrue("Fail to check exception.", e instanceof QueryServiceException);
+			Assert.assertEquals("Fail to compare exception message.",
 					"Query Service : Fail to find queryId [notexistqueryid] in mapping xml files.",
 					((QueryServiceException) e).getMessage());
 		}
@@ -240,14 +242,15 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testFindDataSetWithoutDynamic() throws QueryServiceException {
 		try {
 			xpQueryService.search("findXPQueryServiceWithoutDynamic", makeVariantList());
-			fail("Fail to throw exception.");
+			Assert.fail("Fail to throw exception.");
 		}
 		catch (Exception e) {
-			assertTrue("Fail to check exception.", e instanceof QueryServiceException);
-			assertEquals("Fail to compare exception message.",
+			Assert.assertTrue("Fail to check exception.", e instanceof QueryServiceException);
+			Assert.assertEquals("Fail to compare exception message.",
 					"Query Service : queryId [findXPQueryServiceWithoutDynamic] is not dynamic statements.",
 					((QueryServiceException) e).getMessage());
 		}
@@ -259,16 +262,17 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * 
 	 * @throws Exception
 	 */
+	@Test
 	public void testFindDataSetWithWrongQuery() throws QueryServiceException {
 		try {
 			xpQueryService.search("findXPQueryServiceWithWrongQuery", makeVariantList());
-			fail("Fail to throw exception.");
+			Assert.fail("Fail to throw exception.");
 		}
 		catch (Exception e) {
-			assertTrue(e instanceof QueryServiceException);
+			Assert.assertTrue(e instanceof QueryServiceException);
 			QueryServiceException qe = (QueryServiceException) e;
-			assertEquals("Fail to compare sql error code.", "904", qe.getSqlErrorCode());
-			assertEquals("Fail to compare sql error message.", "ORA-00904: \"A\".\"NOTEXITCOLUMN\": 부적합한 식별자\n", qe.getSqlErrorMessage());
+			Assert.assertEquals("Fail to compare sql error code.", "904", qe.getSqlErrorCode());
+			Assert.assertEquals("Fail to compare sql error message.", "ORA-00904: \"A\".\"NOTEXITCOLUMN\": 부적합한 식별자\n", qe.getSqlErrorMessage());
 			//assertEquals("Fail to compare sql error message.", "ORA-00904: 열명이 부적합합니다\n", qe.getSqlErrorMessage());
 		}
 	}
@@ -278,11 +282,11 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * @throws Exception
 	 */
 	private void insertDataSet() throws Exception {
-		Map queryMap = new HashMap();
+		Map<String, Object> queryMap = new HashMap<String, Object>();
 		queryMap.put(XPQueryService.QUERY_INSERT, "createXPQueryService");
 
 		int resultInsert = xpQueryService.update(queryMap, makeInsertDataSet());
-		assertEquals("Fail to insert XPDataSet.", 3, resultInsert);
+		Assert.assertEquals("Fail to insert XPDataSet.", 3, resultInsert);
 
 		findListDataSet(3);
 	}
@@ -294,21 +298,21 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 */
 	private void findListDataSet(int expected) throws Exception {
 		DataSet resultDataSet = xpQueryService.search("findListXPQueryService", makeSelectDataSet("%bbnydory%"));
-		assertEquals("Fail to find XPDataSet.", expected, resultDataSet.getRowCount());
+		Assert.assertEquals("Fail to find XPDataSet.", expected, resultDataSet.getRowCount());
 
 		int totalRowCount = resultDataSet.getRowCount();
 		for (int rowNum = 0; rowNum < totalRowCount; rowNum++) {
-			assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "TEST_CHAR").startsWith("bbnydory"));
+			Assert.assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "TEST_CHAR").startsWith("bbnydory"));
 
-			assertEquals("Fail to check result.", "2012-12-01", DateUtil.date2String(resultDataSet.getDateTime(rowNum,
+			Assert.assertEquals("Fail to check result.", "2012-12-01", DateUtil.date2String(resultDataSet.getDateTime(rowNum,
 					"TEST_DATE"), DATE_PATTERN));
 
-			assertEquals("Fail to check result.", 12345678, ((BigDecimal) resultDataSet
+			Assert.assertEquals("Fail to check result.", 12345678, ((BigDecimal) resultDataSet
 					.getObject(rowNum, "TEST_NUMBER")).intValue());
 
-			assertEquals("Fail to check result.", 1234.5678, resultDataSet.getDouble(rowNum, "TEST_DOUBLE"));
+			Assert.assertEquals("Fail to check result.", 1234.5678, resultDataSet.getDouble(rowNum, "TEST_DOUBLE"));
 
-			assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "TEST_VARCHAR2").startsWith(
+			Assert.assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "TEST_VARCHAR2").startsWith(
 					"Anyframe XPQueryService Test."));
 
 		}
@@ -322,7 +326,7 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 */
 	private DataSet findDataSet(String searchKeyword) throws Exception {
 		DataSet resultDataSet = xpQueryService.search("findXPQueryService", makeSelectDataSet(searchKeyword));
-		assertEquals(1, resultDataSet.getRowCount());
+		Assert.assertEquals(1, resultDataSet.getRowCount());
 
 		return resultDataSet;
 	}
@@ -337,16 +341,16 @@ public class XPQueryServiceTest extends AbstractDependencyInjectionSpringContext
 	 * @param col5
 	 */
 	private void assertDataSet(DataSet resultDataSet, String col1, String col2, int col3, double col4, String col5) {
-		assertEquals("Fail to check result.", col1, resultDataSet.getString(0, "TEST_CHAR"));
+		Assert.assertEquals("Fail to check result.", col1, resultDataSet.getString(0, "TEST_CHAR"));
 
-		assertEquals("Fail to check result.", col2, DateUtil.date2String(resultDataSet.getDateTime(0, "TEST_DATE"),
+		Assert.assertEquals("Fail to check result.", col2, DateUtil.date2String(resultDataSet.getDateTime(0, "TEST_DATE"),
 				DATE_PATTERN));
 
-		assertEquals("Fail to check result.", col3, ((BigDecimal) resultDataSet.getObject(0, "TEST_NUMBER")).intValue());
+		Assert.assertEquals("Fail to check result.", col3, ((BigDecimal) resultDataSet.getObject(0, "TEST_NUMBER")).intValue());
 
-		assertEquals("Fail to check result.", col4, resultDataSet.getDouble(0, "TEST_DOUBLE"));
+		Assert.assertEquals("Fail to check result.", col4, resultDataSet.getDouble(0, "TEST_DOUBLE"));
 
-		assertEquals("Fail to check result.", col5, resultDataSet.getString(0, "TEST_VARCHAR2"));
+		Assert.assertEquals("Fail to check result.", col5, resultDataSet.getString(0, "TEST_VARCHAR2"));
 	}
 
 	/**

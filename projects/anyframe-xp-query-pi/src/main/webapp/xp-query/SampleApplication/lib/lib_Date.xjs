@@ -69,7 +69,7 @@ function gfnAddMonth(date, nOffSet)
     var nYear  = parseInt(date.substr(0, 4));
     var nMonth = parseInt(date.substr(4, 2)) + nOffSet;
     var nDate  = parseInt(date.substr(6, 2));
-    
+
     return gfnDateTime(nYear, nMonth, nDate);
 }
 

@@ -24,8 +24,6 @@
 //
 //import org.anyframe.xp.query.util.XPMapper;
 //import org.anyframe.xp.query.web.controller.AbstractXPController;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
 //import org.springframework.mock.web.MockHttpServletRequest;
 //import org.springframework.mock.web.MockHttpServletResponse;
 //

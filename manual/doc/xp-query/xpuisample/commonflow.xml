@@ -182,7 +182,7 @@ function fnCallback(strServiceId, strErrorCode, strErrorMsg){
 			<title>DataSet For Service</title>
 			<para>
 				데이터를 가져오기 위해서 gfnService() 함수를 통해 Service를 호출 할 경우,
-				호출할 Service에 대한 여라가지 파라미터 정보를 DataSet에 정의해야 한다.
+				호출할 Seervice에 대한 여라가지 파라미터 정보를 DataSet에 정의해야 한다.
 				따라서 모든 화면에 다음과 같은 값들이 정의된 
 				<emphasis role="bold">dsService</emphasis> 라는 이름의 DataSet이 반드시 포함 되어야 한다.
 			</para>

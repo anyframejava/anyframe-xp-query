@@ -16,8 +16,8 @@
 package org.anyframe.plugin.xp.query.security.service;
 
 import org.anyframe.xp.query.service.XPService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.tobesoft.xplatform.data.DataSetList;
 import com.tobesoft.xplatform.data.VariableList;
@@ -28,7 +28,6 @@ import com.tobesoft.xplatform.data.VariableList;
  * @author Youngmin Jo
  */
 public interface AuthenticationService extends XPService{
-	public static Log logger = LogFactory.getLog(AuthenticationService.class);
-	
+	public static Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 	void get(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception;
 }

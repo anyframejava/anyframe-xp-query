@@ -31,6 +31,23 @@ import com.tobesoft.xplatform.tx.HttpPlatformRequest;
  */
 public class XPController extends AbstractXPController {
 	
+	/**
+	 * This method is implementation in AbstractXPController. 
+	 * this method lookup spring framework bean and invoke bean's method
+	 * @param platformRequest
+	 * 		PlatformRequest which HttpServletRequest changed is including
+	 * 		information of MiPlatform UI.
+	 * @param inVl
+	 * 		VariableList including the query id or query condition etc.
+	 * @param inDl
+	 * 		The Dataset list including query conditions
+	 * @param outVl
+	 * 		Output VaiableList including return values. 
+	 * @param outDl
+	 * 		Output DatasetList including return values.
+	 * @throws Exception
+	 *		if there is any problem executing.
+	 */
 	public void operate(HttpPlatformRequest request, VariableList inVl,
 			DataSetList inDl, VariableList outVl, DataSetList outDl)
 			throws Exception {
@@ -44,7 +61,7 @@ public class XPController extends AbstractXPController {
 			method.invoke(bean, new Object[] {inVl, inDl, outVl, outDl });
 		} catch (Exception e){
 			Throwable te = e.getCause();
-			logger.error(te);
+			logger.error("Can not invoke a dispatch method name", te);
 			throw new BaseException("Fail to process client request.", te);
 		}
 	}

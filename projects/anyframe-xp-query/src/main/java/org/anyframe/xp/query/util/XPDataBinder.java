@@ -24,7 +24,7 @@ import com.tobesoft.xplatform.data.VariableList;
 
 /**
  * The class expanding the org.springframework.validation.DataBinder
- * <P>As data changing util class, when using the Tobesoft's MiPlatform's to develop
+ * <P>As data changing util class, when using the Tobesoft's XPlatform's to develop
  * the UI, it includes the method for changing the value of VariableList and DataSet 
  * used as data transmitting object.<p>
  * @author Jonghoon Kim
@@ -37,7 +37,7 @@ public class XPDataBinder extends DataBinder {
 	private boolean convertToCamelCase = false;
 	
 	/**
-	 * MiPDataBinder's constructor.
+	 * XPDataBinder's constructor.
 	 * @param target
 	 * 			Value Object
 	 */
@@ -46,7 +46,7 @@ public class XPDataBinder extends DataBinder {
 	}
 	
 	/**
-	 * MiPDataBinder's constructor. 
+	 * XPDataBinder's constructor. 
 	 * @param target
 	 * 			Value Object
 	 * @param convertToCamenCase
@@ -58,7 +58,7 @@ public class XPDataBinder extends DataBinder {
 	}
 	
 	/**
-	 * Maps to VariableList the VO's value set by using the MiPDataBinder constructor.
+	 * Maps to VariableList the VO's value set by using the XPDataBinder constructor.
 	 * @param variableList
 	 * 			VariableList
 	 */
@@ -68,7 +68,7 @@ public class XPDataBinder extends DataBinder {
 	}	
 
 	/**
-	 * Maps to DataSet the VO's value set using the MiPDataBinder constructor
+	 * Maps to DataSet the VO's value set using the XPDataBinder constructor
 	 * @param dataList
 	 * 			MiPlatform DataSet
 	 * @param rowNum
@@ -79,7 +79,7 @@ public class XPDataBinder extends DataBinder {
 		doBind(mpvs);
 	}
 	/**
-	 * Maps to the DataSet the VO's value set using the MiPDataBinder constructor
+	 * Maps to the DataSet the VO's value set using the XPDataBinder constructor
 	 * If delete record, the isDeleted is true.
 	 * @param dataList
 	 * 			MiPlatform DataSet

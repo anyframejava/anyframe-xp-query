@@ -24,12 +24,19 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
+
+import junit.framework.Assert;
 
 import org.anyframe.query.QueryServiceException;
 import org.anyframe.util.DateUtil;
 import org.anyframe.xp.query.XPQueryService;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.FileCopyUtils;
 
 import com.tobesoft.xplatform.data.DataSet;
@@ -38,26 +45,18 @@ import com.tobesoft.xplatform.data.DataTypes;
 /**
  * @author JongHoon Kim
  */
-public class XPQueryServiceBlobClobTest extends
-        AbstractDependencyInjectionSpringContextTests {
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:/spring/context-*.xml" })
+public class XPQueryServiceBlobClobTest {
+	
+	@Inject
     private DataSource dataSource;
+	
+	@Inject
     private XPQueryService xpQueryService;
 
-    protected String[] getConfigLocations() {
-        return new String[] {"classpath:/spring/context-*.xml" };
-    }
-
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public void setXpQueryService(XPQueryService xpQueryService) {
-        this.xpQueryService = xpQueryService;
-    }
-
+	@Before
     public void onSetUp() throws Exception {
-        super.onSetUp();
         try {
             Connection conn = dataSource.getConnection();
             try {
@@ -77,22 +76,24 @@ public class XPQueryServiceBlobClobTest extends
             }
         } catch (SQLException e) {
             System.err.println("Unable to initialize database for test." + e);
-            fail("Unable to initialize database for test. " + e);
+            Assert.fail("Unable to initialize database for test. " + e);
         }
     }
-
+	
+	@Test
     public void testInsertBlobClob() throws QueryServiceException {
-        Map queryMap = new HashMap();
+        Map<String, Object> queryMap = new HashMap<String, Object>();
         queryMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
         int resultCount =
             xpQueryService.update(queryMap, makeInsertLobDataSet());
-        assertEquals(2, resultCount);
+        Assert.assertEquals(2, resultCount);
     }
-
+	
+	@Test
     public void testUpdateBlobClob() throws Exception {
         // Data initialization
         try {
-            Map sqlMap = new HashMap();
+            Map<String, Object> sqlMap = new HashMap<String, Object>();
             sqlMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
             xpQueryService.update(sqlMap, makeInsertLobDataSet());
         } catch (Exception e) {
@@ -101,17 +102,18 @@ public class XPQueryServiceBlobClobTest extends
                 e);
         }
         // Test Update
-        Map sqlMap = new HashMap();
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
         sqlMap.put(XPQueryService.QUERY_UPDATE, "updateBlobClob");
         int resultCount =
             xpQueryService.update(sqlMap, makeUpdateLobDataSet());
-        assertEquals(1, resultCount);
+        Assert.assertEquals(1, resultCount);
 
     }
-
+	
+	@Test
     public void testFindBlobClob() throws Exception {
         try {
-            Map sqlMap = new HashMap();
+            Map<String, Object> sqlMap = new HashMap<String, Object>();
             sqlMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
             xpQueryService.update(sqlMap, makeInsertLobDataSet());
         } catch (Exception e) {
@@ -122,13 +124,13 @@ public class XPQueryServiceBlobClobTest extends
         // Test Select
         DataSet resultDs =
             xpQueryService.search("findBlobClob", makeFindDataSet());
-        assertEquals(2, resultDs.getRowCount());
-        assertEquals(makeInsertBlobData().length, resultDs
+        Assert.assertEquals(2, resultDs.getRowCount());
+        Assert.assertEquals(makeInsertBlobData().length, resultDs
             .getBlob(0, "testBlob").length);
-        assertEquals(makeInsertBlobData().length, resultDs
+        Assert.assertEquals(makeInsertBlobData().length, resultDs
             .getBlob(1, "testBlob").length);
-        assertNotNull(resultDs.getObject(0, "testClob"));
-        assertNotNull(resultDs.getObject(1, "testClob"));
+        Assert.assertNotNull(resultDs.getObject(0, "testClob"));
+        Assert.assertNotNull(resultDs.getObject(1, "testClob"));
     }
 
     private DataSet makeInsertLobDataSet() {
@@ -196,7 +198,7 @@ public class XPQueryServiceBlobClobTest extends
             fis = new FileInputStream("./testlobdata/CreateLobTest.txt");
             blobByte = FileCopyUtils.copyToByteArray(fis);
         } catch (IOException e) {
-            fail("Fail to read file");
+        	Assert.fail("Fail to read file");
         } finally {
             if (fis != null) {
                 try {
@@ -216,7 +218,7 @@ public class XPQueryServiceBlobClobTest extends
             fis = new FileInputStream("./testlobdata/UpdateLobTest.txt");
             blobByte = FileCopyUtils.copyToByteArray(fis);
         } catch (IOException e) {
-            fail("Fail to read file");
+        	Assert.fail("Fail to read file");
         } finally {
             if (fis != null) {
                 try {

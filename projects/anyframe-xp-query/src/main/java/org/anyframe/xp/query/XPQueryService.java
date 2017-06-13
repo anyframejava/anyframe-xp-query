@@ -30,14 +30,16 @@ import com.tobesoft.xplatform.data.VariableList;
  * Software company.
  * <p>
  * In order to use XPQueryService the
- * anyframe.core.query.ria.impl.RiaQueryServiceImpl</code> class has to be
+ * org.anyframe.query.ria.AbstractRiaQueryService</code> class has to be
  * registered as Bean.
  * </p>
  * XPQueryService Configuration Example:
  * 
  * <pre>
  * &lt;bean id="xpQueryService" class="org.anyframe.xp.query.impl.XPQueryServiceImpl"&gt;
- *     &lt;property name="namedParamJdbcTemplate" ref="pagingNamedParamJdbcTemplate"/&gt;
+
+
+ *     
  *     &lt;property name="lobHandler" ref="lobHandler"/&gt;
  *     &lt;property name="sqlRepository" ref="sqlLoader"/&gt;
  *     &lt;lookup-method name="getRowCallbackHandler" bean="rowCallbackHandler"/&gt;
@@ -182,6 +184,7 @@ public interface XPQueryService {
 	 * @return the number of records affected
 	 * @throws QueryServiceException if there is any problem executing the query
 	 */
+	@SuppressWarnings("unchecked")
 	int update(String queryId, VariableList variableList, Map queryMap, DataSet paramDataSet)
 			throws QueryServiceException;
 
@@ -203,6 +206,7 @@ public interface XPQueryService {
 	 * @return the number of records affected
 	 * @throws QueryServiceException if there is any problem executing the query
 	 */
+	@SuppressWarnings("unchecked")
 	int update(String queryId, VariableList variableList, Map queryMap, DataSet dataSet, XPActionCommand actionCommand)
 			throws QueryServiceException;
 
@@ -219,6 +223,7 @@ public interface XPQueryService {
 	 * @return the number of records affected
 	 * @throws QueryServiceException if there is any problem executing the query
 	 */
+	@SuppressWarnings("unchecked")
 	int update(Map queryMap, DataSet dataSet) throws QueryServiceException;
 
 	/**
@@ -237,6 +242,7 @@ public interface XPQueryService {
 	 * @return the number of records affected
 	 * @throws QueryServiceException if there is any problem executing the query
 	 */
+	@SuppressWarnings("unchecked")
 	int update(Map queryMap, DataSet dataSet, XPActionCommand actionCommand) throws QueryServiceException;
 
 	DataSetList execute(String queryId)throws QueryServiceException;

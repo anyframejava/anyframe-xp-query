@@ -21,8 +21,6 @@ import java.util.HashMap;
 
 import javax.servlet.ServletException;
 
-import org.anyframe.exception.BaseException;
-
 import com.tobesoft.xplatform.data.DataSetList;
 import com.tobesoft.xplatform.data.VariableList;
 import com.tobesoft.xplatform.tx.HttpPlatformRequest;
@@ -53,13 +51,14 @@ public class AbstractXPDispatchController extends AbstractXPController {
 	 * The Class instance of this <code>AnyframeMiPDispatchConroller</code>
 	 * class.
 	 */
-	protected Class clazz = this.getClass();
+	protected Class<?> clazz = this.getClass();
 
 	/**
 	 * The set of Method objects we have introspected for this class, keyed by
 	 * method name. This collection is populated as different methods are
 	 * called, so that introspection needs to occur only once per method name.
 	 */
+	@SuppressWarnings("unchecked")
 	protected Class[] types = { HttpPlatformRequest.class, VariableList.class,
 			DataSetList.class, VariableList.class, DataSetList.class };
 
@@ -97,8 +96,7 @@ public class AbstractXPDispatchController extends AbstractXPController {
 			}
 			dispatchMethod(httpPlatformRequest, name, inVl, inDl, outVl, outDl);
 		} catch (Exception e) {
-			logger.error("Can not excute dispatch method.");
-			logger.error(e.getCause());
+			logger.error("Can not excute dispatch method." , e.getCause());
 			throw new Exception("Fail to process client request.", e.getCause());
 		}
 	}
@@ -140,7 +138,7 @@ public class AbstractXPDispatchController extends AbstractXPController {
 			method.invoke(this, args);
 
 		} catch (IllegalAccessException e) {
-			logger.error(e);
+			logger.error("Can not access a dispatch method name", e);
 			throw e;
 
 		} catch (InvocationTargetException e) {
@@ -148,7 +146,7 @@ public class AbstractXPDispatchController extends AbstractXPController {
 			if (t instanceof Exception) {
 				throw ((Exception) t);
 			} else {
-				logger.error(t);
+				logger.error("Can not invoke a dispatch method name", t);
 				throw new ServletException(t);
 			}
 		}

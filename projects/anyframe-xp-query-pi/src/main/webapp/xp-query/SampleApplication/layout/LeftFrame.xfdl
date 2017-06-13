@@ -43,11 +43,11 @@ function LeftFrame_onload(obj:Form, e:LoadEventInfo)
 // 좌측의 메뉴 tree를 클릭 했을 때, 메뉴에 해당하는 화면의 Frame을 생성하는 함수
 function grd_LF_SubMenu_oncellclick(obj:Grid, e:GridClickEventInfo)
 {
-	var menuId;
-	if(dsLeftMenu.getColumn(e.row, "menuLevel") == "2"){
-		menuId = dsLeftMenu.getColumn(e.row, "menuId");
-		gfnOpenMenu(menuId);
-	}
+//	var menuId;
+//	if(dsLeftMenu.getColumn(e.row, "menuLevel") == "2"){
+//		menuId = dsLeftMenu.getColumn(e.row, "menuId");
+//		gfnOpenMenu(menuId);
+//	}
 }
 
 // 상단의 메뉴를 클릭 했을 때, 해당 메뉴에 속하는 하위 메뉴를 좌측 메뉴 트리로 설정하는 함수
@@ -76,15 +76,8 @@ function div_range_btn_LF_Range03_onclick(obj:Button,  e:ClickEventInfo)
 function div_range_btn_LF_Range05_onclick(obj:Button,  e:ClickEventInfo)
 {
 	var oFrameSet = AM.WORK;
-	
-	var resultValue = gfnConfirm("msg.mdi.removeall", "YN");
-	
-	if(resultValue == "N") {
-		return;
-	} else if(resultValue == "Y") {
-		for(var i = (oFrameSet.all.length - 1) ; i >= 0 ; i--){
-			oFrameSet.all[i].form.close();
-		}
+	for(var i = (oFrameSet.all.length - 1) ; i >= 0 ; i--){
+		oFrameSet.all[i].form.close();
 	}
 }
 

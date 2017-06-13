@@ -29,10 +29,11 @@ import com.tobesoft.xplatform.data.VariableList;
 
 /**
  * The class expanding org.springframework.beans.MutablePropertyValues
- * <p>Create the object to bind to the VO using the column name and value for MiPlatform's
+ * <p>Create the object to bind to the VO using the column name and value for XPlatform's
  * VariableList and Dataset<p>
  * @author Jonghoon Kim
  */
+@SuppressWarnings("unchecked")
 public class VariableListPropertyValues extends MutablePropertyValues {
 
 	private static final long serialVersionUID = 1L;
@@ -41,7 +42,7 @@ public class VariableListPropertyValues extends MutablePropertyValues {
 	 * After converting the VariableList to key value and the data value to Map type, create
          * the MutablePropertyValues object
 	 * @param variableList
-	 * 			MiPlatform VariableList
+	 * 			XPlatform VariableList
 	 * @param convertToCamelCase
 	 * 			When changing to CamelCase the VariableList' column name, then true
 	 */
@@ -53,7 +54,7 @@ public class VariableListPropertyValues extends MutablePropertyValues {
 	 * After changing to the Map type the data value and Dataset's column name, create the
          * MutablePropertyValues object
 	 * @param dataList
-	 * 			MiPlatform dataset
+	 * 			XPlatform dataset
 	 * @param rowNum
 	 * 			The row number of binded Dataset Record
 	 * @param convertToCamelCase
@@ -67,7 +68,7 @@ public class VariableListPropertyValues extends MutablePropertyValues {
 	 * After changing to Map type the data value and DataSet's column name, create 
 	 * MutablePropertyValues object
 	 * @param dataList
-	 * 			MiPlatform DataSet
+	 * 			XPlatform DataSet
 	 * @param rowNum
 	 * 			The row number of DataSet Record
 	 * @param isDeleted
@@ -82,7 +83,7 @@ public class VariableListPropertyValues extends MutablePropertyValues {
 	/**
 	 * Change to Map the VariableList
 	 * @param variableList
-	 * 			MiPlatform VariableList
+	 * 			XPlatform VariableList
 	 * @param convertToCamelCase
 	 *			When changing to CamelCase the VariableList's key, then true
 	 * @return
@@ -121,7 +122,7 @@ public class VariableListPropertyValues extends MutablePropertyValues {
 	 * Change the DataSet to Map
 	 * 
 	 * @param dataList
-	 * 			MiPlatform DataSet
+	 * 			XPlatform DataSet
 	 * @param rowNum
 	 * 			the row number of Record
 	 * @param isDeleted
