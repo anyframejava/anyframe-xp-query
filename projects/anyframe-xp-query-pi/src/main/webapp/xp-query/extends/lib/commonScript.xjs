@@ -447,7 +447,7 @@ function gfnService(strServiceId, strArgument) {
 		strMethod = arrTemp[1];
 	}
 	
-	// 사용자가 Controller을 설정 했을 경우가 아니면 공통 Controller(mipController.do)로 요청	
+	// 사용자가 Controller을 설정 했을 경우가 아니면 공통 Controller(xpController.do)로 요청	
 	//2. Controller 처리
 	if(gfnIsEmpty(strController)){
 		strController = gvController;
@@ -455,30 +455,35 @@ function gfnService(strServiceId, strArgument) {
 		// 3. 사용자 정의 Biz. Service가 없을 경우 Service & Method 처리
 		if(gfnIsEmpty(strService)) {
 			// 3-1.common service call
-			// 사용자 정의 Biz. Service가 없을 경우 공통 Service(mipService) MiPService 호출
+			// 사용자 정의 Biz. Service가 없을 경우 공통 Service(xpService) XPService 호출
 			strService = gvService;
 			
 			// 3-2.ServiceId로 부터 호출할 method를 추출.
-			//  따라서 ServiceId는 getPagingList, getList, saveAll, execute, create, update, remove, get 중 하나로 시작해야 함.
+			//  따라서 ServiceId는 getPagingList, getList, saveAll, execute, create, update, remove, get, batchSaveAll 중 하나로 시작해야 함.
 			strMethod = gfnLeft(strServiceId, 13);
 			
 			if(strMethod != "getPagingList"){
-				// saveAll, getList, execute 중 하나일 경우 MiPService의 saveAll, getList, execute 메소드 중 하나가 호출 됨
-				strMethod = gfnLeft(strServiceId,7);
+				// batchSaveAll 일 경우 
+				strMethod = gfnLeft(strServiceId, 12);
 				
-				if(gfnIndexOf("saveAll,getList,execute", strMethod) == -1) {
-					// create, update, remove 일 경우 MiPService의 create, update, remove메소드가 호출 됨
-					strMethod = gfnLeft(strServiceId, 6);
+				if(strMethod != "batchSaveAll"){
+					// saveAll, getList, execute 중 하나일 경우 XPService의 saveAll, getList, execute 메소드 중 하나가 호출 됨
+					strMethod = gfnLeft(strServiceId,7);
 					
-					if(gfnIndexOf("create,update,remove", strMethod) == -1) {
-						// get 일 경우 MiPService의 get메소드가 호출 됨
-						strMethod = gfnLeft(strServiceId, 3);
+					if(gfnIndexOf("saveAll,getList,execute", strMethod) == -1) {
+						// create, update, remove 일 경우 XPService의 create, update, remove메소드가 호출 됨
+						strMethod = gfnLeft(strServiceId, 6);
 						
-						if(strMethod != "get") {
-							alert("MSG_INVALID_SERVICEID");
-							return;
+						if(gfnIndexOf("create,update,remove", strMethod) == -1) {
+							// get 일 경우 XPService의 get메소드가 호출 됨
+							strMethod = gfnLeft(strServiceId, 3);
+							
+							if(strMethod != "get") {
+								alert("MSG_INVALID_SERVICEID");
+								return;
+							}
 						}
-					}
+					}				
 				}
 			}
 		}

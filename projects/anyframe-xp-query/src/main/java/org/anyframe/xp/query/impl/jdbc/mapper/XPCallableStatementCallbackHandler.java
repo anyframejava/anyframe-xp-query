@@ -19,15 +19,16 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.anyframe.query.QueryService;
 import org.anyframe.query.ria.RiaCallableStatementCallback;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.support.lob.LobHandler;
 
 import com.tobesoft.xplatform.data.DataSet;
+import com.tobesoft.xplatform.data.DataSetList;
 import com.tobesoft.xplatform.data.DataTypes;
 
 /**
@@ -39,53 +40,55 @@ public class XPCallableStatementCallbackHandler extends XPCallbackSupport
 		implements RiaCallableStatementCallback {
 
 	public XPCallableStatementCallbackHandler() {
+		
 	}
 
-	private ArrayList<SqlOutParameter> sqlParams;
-	
+	private List<SqlParameter> sqlParams;
+
 	@SuppressWarnings("unused")
 	private LobHandler lobHandler;
-
-	@SuppressWarnings("unchecked")
-	public void setSQLParams(ArrayList sqlParams) {
+	
+	public void setSQLParams(List<SqlParameter> sqlParams) {
 		this.sqlParams = sqlParams;
 	}
 
 	public void setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;
 	}
-
-	public Object doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
+	
+	public Object doInCallableStatement(CallableStatement cs)
+			throws SQLException {
 
 		ResultSet rs = null;
 		cs.execute();
-		DataSet dataset = null;
+		DataSetList dataSetList = new DataSetList();
 
-		for (int i = 0; i < sqlParams.size(); i++) {
-			if (sqlParams.get(i) instanceof SqlOutParameter) {
+		for(int i = 0 ; i < sqlParams.size() ; i++){
+			if(sqlParams.get(i) instanceof SqlOutParameter) {
 				SqlOutParameter outParams = (SqlOutParameter) sqlParams.get(i);
 				int sqlType = outParams.getSqlType();
 				String paramName = outParams.getName();
-
-				if (sqlType == XPCallableStatementCallbackHandler.CUSOR) {
+				
+				if(sqlType == XPCallableStatementCallbackHandler.CUSOR) {
 					rs = (ResultSet) cs.getObject(i + 1);
-					dataset = setResultDataSet(paramName, rs);
-				}
-				else {
+					dataSetList.add(setResultDataSet(paramName, rs));
+				} else {
 					Object obj = cs.getObject(i + 1);
-					dataset = new DataSet(paramName);
-					dataset.addColumn(paramName, getDsType(sqlType), 1);
-					dataset.newRow();
-
-					dataset.set(0, paramName, obj);
+					DataSet outDs = new DataSet(paramName);
+					outDs.addColumn(paramName, getDsType(sqlType), 1);
+					
+					outDs.newRow();
+					outDs.set(0, paramName, obj);
+					
+					dataSetList.add(outDs);
 				}
-
 			}
 		}
-		return dataset;
+	
+		return dataSetList;
 	}
 
-	public DataSet setResultDataSet(String datasetId, ResultSet rs) throws SQLException {
+	public DataSet setResultDataSet(String datasetId, ResultSet rs) {
 		DataSet dataset = new DataSet(datasetId);
 		try {
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -95,9 +98,11 @@ public class XPCallableStatementCallbackHandler extends XPCallbackSupport
 			String[] fieldNames = new String[columnCount];
 
 			for (int i = 0; i < columnCount; i++) {
-				String fieldName = getMappingStylekey(queryInfo, rsmd.getColumnName(i + 1));
+				String fieldName = getMappingStylekey(queryInfo, rsmd
+						.getColumnName(i + 1));
 				int colPrecision = rsmd.getPrecision(i + 1);
-				dataset.addColumn(fieldName, getDsType(rsmd.getColumnType(i + 1)), colPrecision);
+				dataset.addColumn(fieldName, getDsType(rsmd
+						.getColumnType(i + 1)), colPrecision);
 
 				columnTypes[i] = rsmd.getColumnType(i + 1);
 				fieldNames[i] = fieldName;
@@ -110,14 +115,14 @@ public class XPCallableStatementCallbackHandler extends XPCallbackSupport
 			while (rs.next()) {
 				dataset.newRow();
 				for (int i = 1; i <= columnCount; i++) {
-					dataset.set(rowCount, fieldNames[i - 1], getValues(rs, i, columnTypes[i - 1]));
+					dataset.set(rowCount, fieldNames[i - 1], getValues(rs, i,
+							columnTypes[i - 1]));
 				}
 				rowCount++;
 			}
-		}
-		
-		catch (Exception e) {
-			QueryService.LOGGER.error("XPCallableStatment Can not convert Result to DataSet.", e);
+		} catch (SQLException e) {
+			QueryService.LOGGER.error(
+					"XPCallableStatment Can not convert Result to DataSet.", e);
 		}
 		return dataset;
 	}

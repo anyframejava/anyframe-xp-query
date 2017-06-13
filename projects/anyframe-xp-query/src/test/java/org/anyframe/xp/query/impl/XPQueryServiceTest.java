@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 
 import junit.framework.Assert;
 
-import org.anyframe.query.QueryServiceException;
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.util.DateUtil;
 import org.anyframe.xp.query.XPActionCommand;
 import org.anyframe.xp.query.XPQueryService;
@@ -66,6 +66,7 @@ import com.tobesoft.xplatform.data.VariableList;
  * <li>#7 - Negative Case : query mapping xml파일에 등록된 query가 잘못된 문법일 경우 발생하는
  * exception과 메세지를 검증한다.</li>
  * </ul>
+ * 
  * @author JongHoon Kim
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -75,7 +76,7 @@ public class XPQueryServiceTest {
 
 	@Inject
 	private DataSource dataSource;
-	
+
 	@Inject
 	private XPQueryService xpQueryService;
 
@@ -83,8 +84,8 @@ public class XPQueryServiceTest {
 	 * 테스트를 위한 기본 테이블 생성 및 기본 데이터 입력
 	 */
 	@Before
-	public void onSetUp() throws Exception {
-		
+	public void onSetUp() {
+
 		try {
 			Connection conn = dataSource.getConnection();
 			try {
@@ -92,20 +93,19 @@ public class XPQueryServiceTest {
 
 				try {
 					statement.executeUpdate("DROP TABLE TB_XP_TEST");
-				}
-				catch (SQLException e) {
+				} catch (SQLException e) {
 					System.out.println("Fail to DROP Table.");
 				}
 
-				statement.executeUpdate("CREATE TABLE TB_XP_TEST ( " + "TEST_CHAR CHAR(10), "
-						+ "TEST_VARCHAR2 VARCHAR2(255)," + "TEST_NUMBER NUMBER(13)," + "TEST_DOUBLE NUMBER(8,4),"
-						+ "TEST_DATE DATE" + ")");
-			}
-			finally {
+				statement.executeUpdate("CREATE TABLE TB_XP_TEST ( "
+						+ "TEST_CHAR CHAR(10), "
+						+ "TEST_VARCHAR2 VARCHAR2(255),"
+						+ "TEST_NUMBER NUMBER(13),"
+						+ "TEST_DOUBLE NUMBER(8,4)," + "TEST_DATE DATE" + ")");
+			} finally {
 				conn.close();
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			System.err.println("Unable to initialize database for test." + e);
 			Assert.fail("Unable to initialize database for test. " + e);
 		}
@@ -119,18 +119,18 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testUpdateDataSet() throws Exception {
+	public void testUpdateDataSet() {
 		insertDataSet();
 
-		Map<String, Object> queryMap = new HashMap<String, Object>();
+		Map<String, String> queryMap = new HashMap<String, String>();
 		queryMap.put(XPQueryService.QUERY_UPDATE, "updateXPQueryService");
 		int resultUpdate = xpQueryService.update(queryMap, makeUpdateDataSet());
 		Assert.assertEquals(1, resultUpdate);
 
 		DataSet resultDataSet = findDataSet("bbnydory00");
 
-		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678, 1234.5678,
-				"Anyframe XPQueryService Test. - UPDATE");
+		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678,
+				1234.5678, "Anyframe XPQueryService Test. - UPDATE");
 	}
 
 	/**
@@ -140,10 +140,10 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testProcessAllDataSet() throws Exception {
+	public void testProcessAllDataSet() {
 		insertDataSet();
 
-		Map<String, Object> queryMap = new HashMap<String, Object>();
+		Map<String, String> queryMap = new HashMap<String, String>();
 		queryMap.put(XPQueryService.QUERY_UPDATE, "updateXPQueryService");
 		queryMap.put(XPQueryService.QUERY_INSERT, "createXPQueryService");
 		queryMap.put(XPQueryService.QUERY_DELETE, "deleteXPQueryService");
@@ -153,8 +153,8 @@ public class XPQueryServiceTest {
 		findListDataSet(5);
 
 		DataSet resultDataSet = findDataSet("bbnydory00");
-		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678, 1234.5678,
-				"Anyframe XPQueryService Test. - UPDATE");
+		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678,
+				1234.5678, "Anyframe XPQueryService Test. - UPDATE");
 	}
 
 	/**
@@ -165,39 +165,43 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testProcessAllDataSetWithActionCommand() throws Exception {
+	public void testProcessAllDataSetWithActionCommand() {
 		insertDataSet();
 
-		Map<String, Object> queryMap = new HashMap<String, Object>();
+		Map<String, String> queryMap = new HashMap<String, String>();
 		queryMap.put(XPQueryService.QUERY_INSERT, "createXPQueryService");
 		queryMap.put(XPQueryService.QUERY_UPDATE, "updateXPQueryService");
 		queryMap.put(XPQueryService.QUERY_DELETE, "deleteXPQueryService");
-		int resultUpdate = xpQueryService.update(queryMap, makeAllDataSet(), new XPActionCommand() {
+		int resultUpdate = xpQueryService.update(queryMap, makeAllDataSet(),
+				new XPActionCommand() {
 
-			public void postDelete(DataSet record, int currentRow) {
-			}
+					public void postDelete(DataSet record, int currentRow) {
+					}
 
-			public void postInsert(DataSet record, int currentRow) {
-			}
+					public void postInsert(DataSet record, int currentRow) {
+					}
 
-			public void postUpdate(DataSet record, int currentRow) {
-			}
+					public void postUpdate(DataSet record, int currentRow) {
+					}
 
-			public void preDelete(DataSet record, int currentRow) {
-			}
+					public void preDelete(DataSet record, int currentRow) {
+					}
 
-			public void preInsert(DataSet record, int currentRow) {
-				record.set(currentRow, "TEST_VARCHAR2", "Anyframe preUpdate");
-			}
+					public void preInsert(DataSet record, int currentRow) {
+						record.set(currentRow, "TEST_VARCHAR2",
+								"Anyframe preUpdate");
+					}
 
-			public void preUpdate(DataSet record, int currentRow) {
-			}
-		});
-		Assert.assertEquals("Fail to process all with ActionCommand.", 3, resultUpdate);
+					public void preUpdate(DataSet record, int currentRow) {
+					}
+				});
+		Assert.assertEquals("Fail to process all with ActionCommand.", 3,
+				resultUpdate);
 
 		DataSet resultDataSet = findDataSet("bbnydory88");
 
-		assertDataSet(resultDataSet, "bbnydory88", "2012-12-01", 12345678, 1234.5678, "Anyframe preUpdate");
+		assertDataSet(resultDataSet, "bbnydory88", "2012-12-01", 12345678,
+				1234.5678, "Anyframe preUpdate");
 	}
 
 	/**
@@ -207,13 +211,15 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithVariant() throws Exception {
+	public void testFindDataSetWithVariant() {
 		insertDataSet();
 
-		DataSet resultDataSet = xpQueryService.search("findXPQueryService", makeVariantList());
+		DataSet resultDataSet = xpQueryService.search("findXPQueryService",
+				makeVariantList());
 		Assert.assertEquals(1, resultDataSet.getRowCount());
 
-		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678, 1234.5678, "Anyframe XPQueryService Test.");
+		assertDataSet(resultDataSet, "bbnydory00", "2012-12-01", 12345678,
+				1234.5678, "Anyframe XPQueryService Test.");
 	}
 
 	/**
@@ -223,16 +229,18 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithWrongQueryId() throws QueryServiceException {
+	public void testFindDataSetWithWrongQueryId() throws QueryException {
 		try {
 			xpQueryService.search("notexistqueryid", makeVariantList());
 			Assert.fail("Fail to throw exception.");
-		}
-		catch (Exception e) {
-			Assert.assertTrue("Fail to check exception.", e instanceof QueryServiceException);
-			Assert.assertEquals("Fail to compare exception message.",
-					"Query Service : Fail to find queryId [notexistqueryid] in mapping xml files.",
-					((QueryServiceException) e).getMessage());
+		} catch (Exception e) {
+			Assert.assertTrue("Fail to check exception.",
+					e instanceof QueryException);
+			Assert
+					.assertEquals(
+							"Fail to compare exception message.",
+							"Query Service : Fail to find queryId [notexistqueryid] in query mappings.",
+							((QueryException) e).getMessage());
 		}
 	}
 
@@ -243,16 +251,19 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithoutDynamic() throws QueryServiceException {
+	public void testFindDataSetWithoutDynamic() throws QueryException {
 		try {
-			xpQueryService.search("findXPQueryServiceWithoutDynamic", makeVariantList());
+			xpQueryService.search("findXPQueryServiceWithoutDynamic",
+					makeVariantList());
 			Assert.fail("Fail to throw exception.");
-		}
-		catch (Exception e) {
-			Assert.assertTrue("Fail to check exception.", e instanceof QueryServiceException);
-			Assert.assertEquals("Fail to compare exception message.",
-					"Query Service : queryId [findXPQueryServiceWithoutDynamic] is not dynamic statements.",
-					((QueryServiceException) e).getMessage());
+		} catch (Exception e) {
+			Assert.assertTrue("Fail to check exception.",
+					e instanceof QueryException);
+			Assert
+					.assertEquals(
+							"Fail to compare exception message.",
+							"Query Service : queryId [findXPQueryServiceWithoutDynamic] is not dynamic statements.",
+							((QueryException) e).getMessage());
 		}
 	}
 
@@ -263,26 +274,49 @@ public class XPQueryServiceTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithWrongQuery() throws QueryServiceException {
+	public void testFindDataSetWithWrongQuery() throws QueryException {
 		try {
-			xpQueryService.search("findXPQueryServiceWithWrongQuery", makeVariantList());
+			xpQueryService.search("findXPQueryServiceWithWrongQuery",
+					makeVariantList());
 			Assert.fail("Fail to throw exception.");
+		} catch (Exception e) {
+			Assert.assertTrue(e instanceof QueryException);
+			QueryException qe = (QueryException) e;
+			Assert.assertEquals("Fail to compare sql error code.", "904", qe
+					.getSqlErrorCode());
+			Assert.assertEquals("Fail to compare sql error message.",
+					"ORA-00904: \"A\".\"NOTEXITCOLUMN\": 부적합한 식별자\n", qe
+							.getSqlErrorMessage());
+			// assertEquals("Fail to compare sql error message.",
+			// "ORA-00904: 열명이 부적합합니다\n", qe.getSqlErrorMessage());
 		}
-		catch (Exception e) {
-			Assert.assertTrue(e instanceof QueryServiceException);
-			QueryServiceException qe = (QueryServiceException) e;
-			Assert.assertEquals("Fail to compare sql error code.", "904", qe.getSqlErrorCode());
-			Assert.assertEquals("Fail to compare sql error message.", "ORA-00904: \"A\".\"NOTEXITCOLUMN\": 부적합한 식별자\n", qe.getSqlErrorMessage());
-			//assertEquals("Fail to compare sql error message.", "ORA-00904: 열명이 부적합합니다\n", qe.getSqlErrorMessage());
+	}
+
+	@Test
+	public void testBatchSaveAll() throws QueryException {
+		try {
+			insertDataSet();
+			DataSet inDs = makeAllDataSet();
+			int resultUpdate = xpQueryService.batchCreate(
+					"createXPQueryService", inDs);
+			resultUpdate += xpQueryService.batchUpdate("updateXPQueryService",
+					inDs);
+			resultUpdate += xpQueryService.batchRemove("deleteXPQueryService",
+					inDs);
+
+			findListDataSet(5);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * 데스트를 위한 초기 데이터 값 세팅
+	 * 
 	 * @throws Exception
 	 */
-	private void insertDataSet() throws Exception {
-		Map<String, Object> queryMap = new HashMap<String, Object>();
+	private void insertDataSet() throws QueryException {
+		Map<String, String> queryMap = new HashMap<String, String>();
 		queryMap.put(XPQueryService.QUERY_INSERT, "createXPQueryService");
 
 		int resultInsert = xpQueryService.update(queryMap, makeInsertDataSet());
@@ -293,26 +327,34 @@ public class XPQueryServiceTest {
 
 	/**
 	 * 테스트를 실행 한 후 결과값을 검증하기 위해 조회
+	 * 
 	 * @param expected
 	 * @throws Exception
 	 */
-	private void findListDataSet(int expected) throws Exception {
-		DataSet resultDataSet = xpQueryService.search("findListXPQueryService", makeSelectDataSet("%bbnydory%"));
-		Assert.assertEquals("Fail to find XPDataSet.", expected, resultDataSet.getRowCount());
+	private void findListDataSet(int expected) throws QueryException {
+		DataSet resultDataSet = xpQueryService.search("findListXPQueryService",
+				makeSelectDataSet("%bbnydory%"));
+		Assert.assertEquals("Fail to find XPDataSet.", expected, resultDataSet
+				.getRowCount());
 
 		int totalRowCount = resultDataSet.getRowCount();
 		for (int rowNum = 0; rowNum < totalRowCount; rowNum++) {
-			Assert.assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "TEST_CHAR").startsWith("bbnydory"));
+			Assert.assertTrue("Fail to check result.", resultDataSet.getString(
+					rowNum, "TEST_CHAR").startsWith("bbnydory"));
 
-			Assert.assertEquals("Fail to check result.", "2012-12-01", DateUtil.date2String(resultDataSet.getDateTime(rowNum,
-					"TEST_DATE"), DATE_PATTERN));
+			Assert.assertEquals("Fail to check result.", "2012-12-01", DateUtil
+					.dateToString(resultDataSet
+							.getDateTime(rowNum, "TEST_DATE"), DATE_PATTERN));
 
-			Assert.assertEquals("Fail to check result.", 12345678, ((BigDecimal) resultDataSet
-					.getObject(rowNum, "TEST_NUMBER")).intValue());
+			Assert.assertEquals("Fail to check result.", 12345678,
+					((BigDecimal) resultDataSet
+							.getObject(rowNum, "TEST_NUMBER")).intValue());
 
-			Assert.assertEquals("Fail to check result.", 1234.5678, resultDataSet.getDouble(rowNum, "TEST_DOUBLE"));
+			Assert.assertEquals("Fail to check result.", 1234.5678,
+					resultDataSet.getDouble(rowNum, "TEST_DOUBLE"));
 
-			Assert.assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "TEST_VARCHAR2").startsWith(
+			Assert.assertTrue("Fail to check result.", resultDataSet.getString(
+					rowNum, "TEST_VARCHAR2").startsWith(
 					"Anyframe XPQueryService Test."));
 
 		}
@@ -320,12 +362,14 @@ public class XPQueryServiceTest {
 
 	/**
 	 * 테스트를 실행 한 후 결과값을 검증하기 위해 조회
+	 * 
 	 * @param searchKeyword
 	 * @return
-	 * @throws QueryServiceException
+	 * @throws QueryException
 	 */
-	private DataSet findDataSet(String searchKeyword) throws Exception {
-		DataSet resultDataSet = xpQueryService.search("findXPQueryService", makeSelectDataSet(searchKeyword));
+	private DataSet findDataSet(String searchKeyword) throws QueryException {
+		DataSet resultDataSet = xpQueryService.search("findXPQueryService",
+				makeSelectDataSet(searchKeyword));
 		Assert.assertEquals(1, resultDataSet.getRowCount());
 
 		return resultDataSet;
@@ -333,6 +377,7 @@ public class XPQueryServiceTest {
 
 	/**
 	 * DataSet의 결과값을 테스트
+	 * 
 	 * @param resultDataSet
 	 * @param col1
 	 * @param col2
@@ -340,21 +385,29 @@ public class XPQueryServiceTest {
 	 * @param col4
 	 * @param col5
 	 */
-	private void assertDataSet(DataSet resultDataSet, String col1, String col2, int col3, double col4, String col5) {
-		Assert.assertEquals("Fail to check result.", col1, resultDataSet.getString(0, "TEST_CHAR"));
+	private void assertDataSet(DataSet resultDataSet, String col1, String col2,
+			int col3, double col4, String col5) {
+		Assert.assertEquals("Fail to check result.", col1, resultDataSet
+				.getString(0, "TEST_CHAR"));
 
-		Assert.assertEquals("Fail to check result.", col2, DateUtil.date2String(resultDataSet.getDateTime(0, "TEST_DATE"),
-				DATE_PATTERN));
+		Assert.assertEquals("Fail to check result.", col2, DateUtil
+				.dateToString(resultDataSet.getDateTime(0, "TEST_DATE"),
+						DATE_PATTERN));
 
-		Assert.assertEquals("Fail to check result.", col3, ((BigDecimal) resultDataSet.getObject(0, "TEST_NUMBER")).intValue());
+		Assert.assertEquals("Fail to check result.", col3,
+				((BigDecimal) resultDataSet.getObject(0, "TEST_NUMBER"))
+						.intValue());
 
-		Assert.assertEquals("Fail to check result.", col4, resultDataSet.getDouble(0, "TEST_DOUBLE"));
+		Assert.assertEquals("Fail to check result.", col4, resultDataSet
+				.getDouble(0, "TEST_DOUBLE"));
 
-		Assert.assertEquals("Fail to check result.", col5, resultDataSet.getString(0, "TEST_VARCHAR2"));
+		Assert.assertEquals("Fail to check result.", col5, resultDataSet
+				.getString(0, "TEST_VARCHAR2"));
 	}
 
 	/**
 	 * DataSet 세팅
+	 * 
 	 * @return
 	 */
 	private DataSet makeInsertDataSet() {
@@ -399,6 +452,7 @@ public class XPQueryServiceTest {
 
 	/**
 	 * update 테스트를 위하 DataSet 세팅
+	 * 
 	 * @return
 	 */
 	private DataSet makeUpdateDataSet() {
@@ -415,7 +469,8 @@ public class XPQueryServiceTest {
 		updateDataSet.setRowType(0, DataSet.ROW_TYPE_UPDATED);
 
 		updateDataSet.set(0, "TEST_CHAR", "bbnydory00");
-		updateDataSet.set(0, "TEST_VARCHAR2", "Anyframe XPQueryService Test. - UPDATE");
+		updateDataSet.set(0, "TEST_VARCHAR2",
+				"Anyframe XPQueryService Test. - UPDATE");
 		updateDataSet.set(0, "TEST_NUMBER", 12345678);
 		updateDataSet.set(0, "TEST_DOUBLE", 1234.5678);
 		updateDataSet.set(0, "TEST_DATE", getDate());
@@ -425,10 +480,11 @@ public class XPQueryServiceTest {
 
 	/**
 	 * update, insert, delete테스트를 위한 DataSet 세팅
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	private DataSet makeAllDataSet() throws Exception {
+	private DataSet makeAllDataSet() {
 		DataSet allDataSet = new DataSet("bbnydory_all");
 		allDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
 
@@ -444,7 +500,8 @@ public class XPQueryServiceTest {
 		allDataSet.setRowType(0, DataSet.ROW_TYPE_UPDATED);
 
 		allDataSet.set(0, "TEST_CHAR", "bbnydory00");
-		allDataSet.set(0, "TEST_VARCHAR2", "Anyframe XPQueryService Test. - UPDATE");
+		allDataSet.set(0, "TEST_VARCHAR2",
+				"Anyframe XPQueryService Test. - UPDATE");
 		allDataSet.set(0, "TEST_NUMBER", 12345678);
 		allDataSet.set(0, "TEST_DOUBLE", 1234.5678);
 		allDataSet.set(0, "TEST_DATE", getDate());
@@ -476,6 +533,7 @@ public class XPQueryServiceTest {
 
 	/**
 	 * 조회 조건이 들어 있는 DataSet세팅
+	 * 
 	 * @param searchKeyword
 	 * @return
 	 */
@@ -492,6 +550,7 @@ public class XPQueryServiceTest {
 
 	/**
 	 * 조회 조건이 들어 있는 VariableList 세팅
+	 * 
 	 * @return
 	 */
 	private VariableList makeVariantList() {
@@ -501,6 +560,6 @@ public class XPQueryServiceTest {
 	}
 
 	private Timestamp getDate() {
-		return DateUtil.string2Timestamp("2012-12-01", "yyyy-MM-dd");
+		return DateUtil.stringToTimestamp("2012-12-01", "yyyy-MM-dd");
 	}
 }

@@ -24,55 +24,39 @@ import com.tobesoft.xplatform.data.DataSet;
  * 
  * @author Soyon Lim
  */
-public class XPDataSetSQLParameterSource extends DefaultDynamicSqlParameterSource {
+public class XPDataSetSQLParameterSource extends
+		DefaultDynamicSqlParameterSource {
 
-    private DataSet dataset;
-    private int rowNum;
-    private ColumnValueExtractor columnValueExtractor;
+	private final DataSet dataset;
+	private final int rowNum;
+	private final ColumnValueExtractor columnValueExtractor; 
 
-    public XPDataSetSQLParameterSource(DataSet dataset, int rowNum,
-            ColumnValueExtractor columnValueExtractor) {
-        this.dataset = dataset;
-        this.rowNum = rowNum;
-        this.columnValueExtractor = columnValueExtractor;
-    }
+	public XPDataSetSQLParameterSource(DataSet dataset, int rowNum,
+			ColumnValueExtractor columnValueExtractor) {
+		this.dataset = dataset;
+		this.rowNum = rowNum;
+		this.columnValueExtractor = columnValueExtractor;
+	}
 
-    public Object getValue(String columnName) {
-        Object value =
-            columnValueExtractor.getValue(dataset, rowNum, columnName);
-        // if (value == null) {
-        // value =
-        // VariableUtil.getValueString(columnName, new
-        // VariableSelector() {
-        //
-        // public boolean containsKey(String arg0) {
-        // return hasValue(arg0);
-        // }
-        //
-        // public String get(String arg0) {
-        // return
-        // columnValueExtractor.getValue(dataset,
-        // rowNum,
-        // arg0).toString();
-        // }
-        // });
-        // }
-        return value;
-    }
+	public Object getValue(String columnName) {
+		Object value = columnValueExtractor.getValue(dataset, rowNum,
+				columnName);
+		return value;
+	}
 
-    public boolean hasValue(String columnName) {
-        return columnValueExtractor.getValue(dataset, rowNum, columnName) != null;
-    }
+	public boolean hasValue(String columnName) {
+		return columnValueExtractor.getValue(dataset, rowNum, columnName) != null;
+	}
 
-    public interface ColumnValueExtractor {
-        Object getValue(DataSet dataset, int rowNum, String columnName);
-    }
+	public interface ColumnValueExtractor {
+		Object getValue(DataSet dataset, int rowNum, String columnName);
+	}
 
-    public String getTypeName(String arg0) {
-        return arg0;
-    }
-    
-    public DataSet getDataSet() {
-        return this.dataset;
-    }
+	public String getTypeName(String arg0) {
+		return arg0;
+	}
+
+	public DataSet getDataSet() {
+		return this.dataset;
+	}
 }

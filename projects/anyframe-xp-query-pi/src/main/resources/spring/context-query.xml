@@ -6,7 +6,7 @@
 	http://www.anyframejava.org/schema/query http://www.anyframejava.org/schema/query/anyframe-query-1.1.xsd">
 
 	<!-- SqlLoader -->
-	<bean name="sqlLoader" class="org.anyframe.query.impl.config.loader.SQLLoader">
+	<bean name="sqlLoader" class="org.anyframe.query.impl.config.loader.MappingXMLLoader">
 		<property name="mappingFiles">
 			<value>classpath:/sql/query/**/mapping-*.xml</value>
 		</property>

@@ -114,10 +114,22 @@
 			<param type="VARCHAR" binding="IN" name="inVal" />			
 		</query>	
 
+		<query id="callProcedureTwo" isDynamic="false">
+			<statement>{call PROC_TWO_PARAM (?,?,?)}</statement>			
+			<param type="VARCHAR" binding="OUT" name="outVal1" />
+			<param type="VARCHAR" binding="OUT" name="outVal2" />					
+			<param type="VARCHAR" binding="IN" name="inVal" />			
+		</query>
+		
 		<query id="callPackage" isDynamic="false" mappingStyle="none">
 			<statement>{call PKG_REFCURSOR_TEST.PROC_RECORD_SET(?, ?)}</statement>
 			<param type="VARCHAR" binding="IN" name="inVal" />
 			<param type="CURSOR" binding="OUT" name="outVal" />
 		</query>	
+		
+		<query id="callPackageWithNullValue" isDynamic="false" mappingStyle="none">
+			<statement>{call PKG_SYSREFCURSOR_TEST.PROC_RECORD_SET_WITH_NULL(?)}</statement>
+			<param type="CURSOR" binding="OUT" name="outVal" />
+		</query>
 	</queries>
 </queryservice>

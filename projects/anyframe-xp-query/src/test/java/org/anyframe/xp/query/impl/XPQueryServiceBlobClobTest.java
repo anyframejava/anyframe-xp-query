@@ -29,7 +29,8 @@ import javax.sql.DataSource;
 
 import junit.framework.Assert;
 
-import org.anyframe.query.QueryServiceException;
+import org.anyframe.exception.InitializationException;
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.util.DateUtil;
 import org.anyframe.xp.query.XPQueryService;
 import org.junit.Before;
@@ -48,206 +49,205 @@ import com.tobesoft.xplatform.data.DataTypes;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/spring/context-*.xml" })
 public class XPQueryServiceBlobClobTest {
-	
+
 	@Inject
-    private DataSource dataSource;
-	
+	private DataSource dataSource;
+
 	@Inject
-    private XPQueryService xpQueryService;
+	private XPQueryService xpQueryService;
 
 	@Before
-    public void onSetUp() throws Exception {
-        try {
-            Connection conn = dataSource.getConnection();
-            try {
-                Statement statement = conn.createStatement();
+	public void onSetUp() {
+		try {
+			Connection conn = dataSource.getConnection();
+			try {
+				Statement statement = conn.createStatement();
 
-                try {
-                    statement.executeUpdate("DROP TABLE TB_XP_BLOBCLOB");
-                } catch (SQLException e) {
-                    System.out.println("Fail to DROP Table.");
-                }
+				try {
+					statement.executeUpdate("DROP TABLE TB_XP_BLOBCLOB");
+				} catch (SQLException e) {
+					System.out.println("Fail to DROP Table.");
+				}
 
-                statement.executeUpdate("CREATE TABLE TB_XP_BLOBCLOB ( "
-                    + "TEST_CHAR CHAR(10)," + "TEST_BLOB BLOB, "
-                    + "TEST_CLOB CLOB," + "TEST_DATE DATE" + ")");
-            } finally {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Unable to initialize database for test." + e);
-            Assert.fail("Unable to initialize database for test. " + e);
-        }
-    }
-	
+				statement.executeUpdate("CREATE TABLE TB_XP_BLOBCLOB ( "
+						+ "TEST_CHAR CHAR(10)," + "TEST_BLOB BLOB, "
+						+ "TEST_CLOB CLOB," + "TEST_DATE DATE" + ")");
+			} finally {
+				conn.close();
+			}
+		} catch (SQLException e) {
+			System.err.println("Unable to initialize database for test." + e);
+			Assert.fail("Unable to initialize database for test. " + e);
+		}
+	}
+
 	@Test
-    public void testInsertBlobClob() throws QueryServiceException {
-        Map<String, Object> queryMap = new HashMap<String, Object>();
-        queryMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
-        int resultCount =
-            xpQueryService.update(queryMap, makeInsertLobDataSet());
-        Assert.assertEquals(2, resultCount);
-    }
-	
+	public void testInsertBlobClob() throws QueryException {
+		Map<String, String> queryMap = new HashMap<String, String>();
+		queryMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
+		int resultCount = xpQueryService.update(queryMap,
+				makeInsertLobDataSet());
+		Assert.assertEquals(2, resultCount);
+	}
+
 	@Test
-    public void testUpdateBlobClob() throws Exception {
-        // Data initialization
-        try {
-            Map<String, Object> sqlMap = new HashMap<String, Object>();
-            sqlMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
-            xpQueryService.update(sqlMap, makeInsertLobDataSet());
-        } catch (Exception e) {
-            throw new Exception(
-                "An Exception has occurred while initializing Test Update Data",
-                e);
-        }
-        // Test Update
-        Map<String, Object> sqlMap = new HashMap<String, Object>();
-        sqlMap.put(XPQueryService.QUERY_UPDATE, "updateBlobClob");
-        int resultCount =
-            xpQueryService.update(sqlMap, makeUpdateLobDataSet());
-        Assert.assertEquals(1, resultCount);
+	public void testUpdateBlobClob() {
+		// Data initialization
+		try {
+			Map<String, String> sqlMap = new HashMap<String, String>();
+			sqlMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
+			xpQueryService.update(sqlMap, makeInsertLobDataSet());
+		} catch (Exception e) {
+			throw new InitializationException(
+					"An Exception has occurred while initializing Test Update Data",
+					e);
+		}
+		// Test Update
+		Map<String, String> sqlMap = new HashMap<String, String>();
+		sqlMap.put(XPQueryService.QUERY_UPDATE, "updateBlobClob");
+		int resultCount = xpQueryService.update(sqlMap, makeUpdateLobDataSet());
+		Assert.assertEquals(1, resultCount);
 
-    }
-	
+	}
+
 	@Test
-    public void testFindBlobClob() throws Exception {
-        try {
-            Map<String, Object> sqlMap = new HashMap<String, Object>();
-            sqlMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
-            xpQueryService.update(sqlMap, makeInsertLobDataSet());
-        } catch (Exception e) {
-            throw new Exception(
-                "An Exception has occurred while initializing Test Update Data",
-                e);
-        }
-        // Test Select
-        DataSet resultDs =
-            xpQueryService.search("findBlobClob", makeFindDataSet());
-        Assert.assertEquals(2, resultDs.getRowCount());
-        Assert.assertEquals(makeInsertBlobData().length, resultDs
-            .getBlob(0, "testBlob").length);
-        Assert.assertEquals(makeInsertBlobData().length, resultDs
-            .getBlob(1, "testBlob").length);
-        Assert.assertNotNull(resultDs.getObject(0, "testClob"));
-        Assert.assertNotNull(resultDs.getObject(1, "testClob"));
-    }
+	public void testFindBlobClob() {
+		try {
+			Map<String, String> sqlMap = new HashMap<String, String>();
+			sqlMap.put(XPQueryService.QUERY_INSERT, "createBlobClob");
+			xpQueryService.update(sqlMap, makeInsertLobDataSet());
+		} catch (Exception e) {
+			throw new InitializationException(
+					"An Exception has occurred while initializing Test Update Data",
+					e);
+		}
+		// Test Select
+		DataSet resultDs = xpQueryService.search("findBlobClob",
+				makeFindDataSet());
+		Assert.assertEquals(2, resultDs.getRowCount());
+		Assert.assertEquals(makeInsertBlobData().length, resultDs.getBlob(0,
+				"testBlob").length);
+		Assert.assertEquals(makeInsertBlobData().length, resultDs.getBlob(1,
+				"testBlob").length);
+		Assert.assertNotNull(resultDs.getObject(0, "testClob"));
+		Assert.assertNotNull(resultDs.getObject(1, "testClob"));
+	}
 
-    private DataSet makeInsertLobDataSet() {
-        DataSet insertDataSet = new DataSet("bbnydory_insert");
-        insertDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
-        
-        insertDataSet.addColumn("TEST_CHAR", DataTypes.STRING);
-        insertDataSet.addColumn("TEST_BLOB", DataTypes.BLOB);
-        insertDataSet.addColumn("TEST_CLOB", DataTypes.STRING);
-        insertDataSet.addColumn("TEST_DATE", DataTypes.DATE);
+	private DataSet makeInsertLobDataSet() {
+		DataSet insertDataSet = new DataSet("bbnydory_insert");
+		insertDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
 
-        insertDataSet.newRow();
+		insertDataSet.addColumn("TEST_CHAR", DataTypes.STRING);
+		insertDataSet.addColumn("TEST_BLOB", DataTypes.BLOB);
+		insertDataSet.addColumn("TEST_CLOB", DataTypes.STRING);
+		insertDataSet.addColumn("TEST_DATE", DataTypes.DATE);
 
-        insertDataSet.set(0, "TEST_CHAR", "bbnydory00");
-        insertDataSet.set(0, "TEST_BLOB", makeInsertBlobData());
-        insertDataSet.set(0, "TEST_CLOB", makeInsertClobData());
-        insertDataSet.set(0, "TEST_DATE", getDate());
-        
-        insertDataSet.newRow();
+		insertDataSet.newRow();
 
-        insertDataSet.set(1, "TEST_CHAR", "bbnydory01");
-        insertDataSet.set(1, "TEST_BLOB", makeInsertBlobData());
-        insertDataSet.set(1, "TEST_CLOB", makeInsertClobData());
-        insertDataSet.set(1, "TEST_DATE", getDate());
-        return insertDataSet;
-    }
+		insertDataSet.set(0, "TEST_CHAR", "bbnydory00");
+		insertDataSet.set(0, "TEST_BLOB", makeInsertBlobData());
+		insertDataSet.set(0, "TEST_CLOB", makeInsertClobData());
+		insertDataSet.set(0, "TEST_DATE", getDate());
 
-    private DataSet makeUpdateLobDataSet() {
-        DataSet updateDataSet = new DataSet("bbnydory_update");
-        updateDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
+		insertDataSet.newRow();
 
-        updateDataSet.addColumn("TEST_CHAR", DataTypes.STRING);
-        updateDataSet.addColumn("TEST_BLOB", DataTypes.BLOB);
-        updateDataSet.addColumn("TEST_CLOB", DataTypes.STRING);
-        updateDataSet.addColumn("TEST_DATE", DataTypes.DATE);
+		insertDataSet.set(1, "TEST_CHAR", "bbnydory01");
+		insertDataSet.set(1, "TEST_BLOB", makeInsertBlobData());
+		insertDataSet.set(1, "TEST_CLOB", makeInsertClobData());
+		insertDataSet.set(1, "TEST_DATE", getDate());
+		return insertDataSet;
+	}
 
-        updateDataSet.newRow();
-        updateDataSet.setRowType(0, DataSet.ROW_TYPE_UPDATED);
-        
-        updateDataSet.set(0, "TEST_CHAR", "bbnydory00");
-        updateDataSet.set(0, "TEST_BLOB", makeUpdateBlobData());
-        updateDataSet.set(0, "TEST_CLOB", makeUpdateClobData());
-        updateDataSet.set(0, "TEST_DATE", getDate());
-        
-        //updateDataSet.dump();
-        updateDataSet.toString();
-        return updateDataSet;
-    }
+	private DataSet makeUpdateLobDataSet() {
+		DataSet updateDataSet = new DataSet("bbnydory_update");
+		updateDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
 
-    private DataSet makeFindDataSet() {
-        DataSet selectDs = new DataSet("bbnydory_select");
+		updateDataSet.addColumn("TEST_CHAR", DataTypes.STRING);
+		updateDataSet.addColumn("TEST_BLOB", DataTypes.BLOB);
+		updateDataSet.addColumn("TEST_CLOB", DataTypes.STRING);
+		updateDataSet.addColumn("TEST_DATE", DataTypes.DATE);
 
-        selectDs.addColumn("SEARCH_KEYWORD", DataTypes.STRING);
+		updateDataSet.newRow();
+		updateDataSet.setRowType(0, DataSet.ROW_TYPE_UPDATED);
 
-        selectDs.newRow();
+		updateDataSet.set(0, "TEST_CHAR", "bbnydory00");
+		updateDataSet.set(0, "TEST_BLOB", makeUpdateBlobData());
+		updateDataSet.set(0, "TEST_CLOB", makeUpdateClobData());
+		updateDataSet.set(0, "TEST_DATE", getDate());
 
-        selectDs.set(0, "SEARCH_KEYWORD", "%bbnydory%");
-        return selectDs;
-    }
+		// updateDataSet.dump();
+		updateDataSet.toString();
+		return updateDataSet;
+	}
 
-    private byte[] makeInsertBlobData() {
-        FileInputStream fis = null;
-        byte[] blobByte = null;
-        try {
-            fis = new FileInputStream("./testlobdata/CreateLobTest.txt");
-            blobByte = FileCopyUtils.copyToByteArray(fis);
-        } catch (IOException e) {
-        	Assert.fail("Fail to read file");
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return blobByte;
-    }
+	private DataSet makeFindDataSet() {
+		DataSet selectDs = new DataSet("bbnydory_select");
 
-    private byte[] makeUpdateBlobData() {
-        FileInputStream fis = null;
-        byte[] blobByte = null;
-        try {
-            fis = new FileInputStream("./testlobdata/UpdateLobTest.txt");
-            blobByte = FileCopyUtils.copyToByteArray(fis);
-        } catch (IOException e) {
-        	Assert.fail("Fail to read file");
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return blobByte;
-    }
+		selectDs.addColumn("SEARCH_KEYWORD", DataTypes.STRING);
 
-    private String makeInsertClobData() {
-        String clobData = "Anyframe XPQueryService Test.\n";
-        for (int i = 0; i < 100; i++) {
-            clobData += "Anyframe XPQueryService Test.\n";
-        }
-        return clobData;
-    }
+		selectDs.newRow();
 
-    private String makeUpdateClobData() {
-        String clobData = "Anyframe XPQueryService Update Test.\n";
-        for (int i = 0; i < 100; i++) {
-            clobData += "Anyframe XPQueryService Update Test.\n";
-        }
-        return clobData;
-    }
+		selectDs.set(0, "SEARCH_KEYWORD", "%bbnydory%");
+		return selectDs;
+	}
 
-    private Timestamp getDate() {
-        return DateUtil.string2Timestamp("2008-12-01", "yyyy-MM-dd");
-    }
+	private byte[] makeInsertBlobData() {
+		FileInputStream fis = null;
+		byte[] blobByte = null;
+		try {
+			fis = new FileInputStream("./testlobdata/CreateLobTest.txt");
+			blobByte = FileCopyUtils.copyToByteArray(fis);
+		} catch (IOException e) {
+			Assert.fail("Fail to read file");
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return blobByte;
+	}
+
+	private byte[] makeUpdateBlobData() {
+		FileInputStream fis = null;
+		byte[] blobByte = null;
+		try {
+			fis = new FileInputStream("./testlobdata/UpdateLobTest.txt");
+			blobByte = FileCopyUtils.copyToByteArray(fis);
+		} catch (IOException e) {
+			Assert.fail("Fail to read file");
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return blobByte;
+	}
+
+	private String makeInsertClobData() {
+		String clobData = "Anyframe XPQueryService Test.\n";
+		for (int i = 0; i < 100; i++) {
+			clobData += "Anyframe XPQueryService Test.\n";
+		}
+		return clobData;
+	}
+
+	private String makeUpdateClobData() {
+		String clobData = "Anyframe XPQueryService Update Test.\n";
+		for (int i = 0; i < 100; i++) {
+			clobData += "Anyframe XPQueryService Update Test.\n";
+		}
+		return clobData;
+	}
+
+	private Timestamp getDate() {
+		return DateUtil.stringToTimestamp("2008-12-01", "yyyy-MM-dd");
+	}
 }

@@ -15,43 +15,93 @@
  */
 package org.anyframe.plugin.xp.query.security.web;
 
-import java.util.Locale;
-
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 
 import org.anyframe.plugin.xp.query.security.service.AuthenticationService;
-import org.anyframe.xp.query.web.controller.AbstractXPController;
+import org.anyframe.xp.query.web.handler.XPRequestHandler;
+import org.anyframe.xp.query.web.handler.XPResponseHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.tobesoft.xplatform.data.DataSet;
 import com.tobesoft.xplatform.data.DataSetList;
+import com.tobesoft.xplatform.data.Debugger;
 import com.tobesoft.xplatform.data.VariableList;
-import com.tobesoft.xplatform.tx.HttpPlatformRequest;
 
 /**
- * Operate user login
+ * Operate user login and store USER_ID in the session.
  * 
  * @author Youngmin Jo
  */
-public class LoginController extends AbstractXPController {
-
+@Controller
+public class LoginController {
+	
+	Logger logger = LoggerFactory.getLogger(LoginController.class);
+	
 	@Inject
 	@Named("xpSecurityService")
 	private AuthenticationService securityService;
 	
-	@Override
-	public void operate(HttpPlatformRequest httpPlatformRequest,
-			VariableList inVl, DataSetList inDl, VariableList outVl,
-			DataSetList outDl) throws Exception {
-		try{
+	@RequestMapping("/xpQueryLogin.do")
+	@ResponseBody
+	public XPResponseHandler doLogin(@RequestBody XPRequestHandler requestHandler, HttpServletRequest request) throws Exception {
+		VariableList inVl = requestHandler.getInputVariableList();
+		DataSetList inDl = requestHandler.getInputDataSetList();
+		VariableList outVl = null;
+		DataSetList outDl = null;
+
+		try {
+			outVl = new VariableList();
+			outDl = new DataSetList();
+
+			logger.debug("{}.operate() started", new Object[] { this.getClass()
+					.getName() });
+			Debugger debugger = new Debugger();
+			logger.debug("Input VariableList");
+			logger.debug(debugger.detail(inVl));
+
+			logger.debug("Input DataSetList");
+			logger.debug(debugger.detail(inDl));
+
 			securityService.get(inVl, inDl, outVl, outDl);
 			DataSet gdsUser = outDl.get("gdsUser");
-			gdsUser.addConstantColumn("Language", 3, Locale.getDefault().getLanguage());
-			
+
 			outDl.set(0, gdsUser);
-		} catch(Exception e){
-			logger.debug(e.getMessage());
-			throw e;
-		}
+			
+			logger.debug("{}.operate() ended", new Object[] { this.getClass()
+					.getName() });
+			logger.debug("Output VariableList");
+			logger.debug(debugger.detail(outVl));
+			
+			logger.debug("Output DataSetList");
+			logger.debug(debugger.detail(outDl));
+			
+			String userId = outDl.get(0).getString(0, "USER_ID");
+			request.getSession().setAttribute("userId", userId);
+			
+			XPResponseHandler responseHandler = new XPResponseHandler(outDl, outVl); 
+			responseHandler.setResultMessage(0, "Request has been processed successfully");
+
+			return responseHandler; 
+		} catch (Exception e) {
+			String msg = e.getMessage();
+
+			if (msg == null)
+				msg = "Fail to process client request.";
+
+			logger.error(msg);
+
+			XPResponseHandler responseHandler = new XPResponseHandler(outDl, outVl); 
+			responseHandler.setResultMessage(-1, msg);
+			
+			return responseHandler;
+		} 
 	}
+
 }

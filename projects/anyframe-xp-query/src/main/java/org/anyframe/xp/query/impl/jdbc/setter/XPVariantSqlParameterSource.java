@@ -25,31 +25,17 @@ import com.tobesoft.xplatform.data.VariableList;
  * @author Soyon Lim
  * @author JongHoon Kim
  */
-public class XPVariantSqlParameterSource extends DefaultDynamicSqlParameterSource {
+public class XPVariantSqlParameterSource extends
+		DefaultDynamicSqlParameterSource { 
 
-	private VariableList variant;
+	private final VariableList variant;
 
 	public XPVariantSqlParameterSource(VariableList variant) {
 		this.variant = variant;
 	}
 
 	public Object getValue(String arg0) {
-		Object value = variant.getObject(arg0);
-		// if (value == null) {
-		// value = VariableUtil.getValueString(arg0,
-		// new VariableSelector() {
-		//
-		// public boolean containsKey(String arg0) {
-		// return hasValue(arg0);
-		// }
-		//
-		// public String get(String arg0) {
-		// return
-		// variant.getValueAsObject(arg0).toString();
-		// }
-		// });
-		// }
-		return value;
+		return variant.getObject(arg0);
 	}
 
 	public boolean hasValue(String arg0) {
@@ -64,5 +50,5 @@ public class XPVariantSqlParameterSource extends DefaultDynamicSqlParameterSourc
 	public VariableList getVariableList() {
 		return this.variant;
 	}
-	
+
 }

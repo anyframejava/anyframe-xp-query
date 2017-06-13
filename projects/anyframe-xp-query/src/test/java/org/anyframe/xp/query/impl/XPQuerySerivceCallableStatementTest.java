@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 
 import junit.framework.Assert;
 
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.xp.query.XPQueryService;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class XPQuerySerivceCallableStatementTest {
 	 * PKG_REFCURSOR_TEST를 생성한다.
 	 */
 	@Before
-	public void onSetUp() throws Exception {
+	public void onSetUp() {
 		Connection conn = null;
 		Statement statement = null;
 		try {
@@ -77,39 +78,59 @@ public class XPQuerySerivceCallableStatementTest {
 			try {
 				System.out.println("Attempting to drop old table");
 				statement.executeUpdate("DROP FUNCTION FUNC_RETURN_NUM");
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				System.out.println("Fail to DROP Function.");
 			}
 
 			// 2. drop procedure
 			try {
 				statement.executeUpdate("DROP PROCEDURE PROC_TOCHAR");
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				System.out.println("Fail to DROP Procedure.");
 			}
 
 			// 3. drop package
 			try {
 				statement.executeUpdate("DROP PACKAGE PKG_REFCURSOR_TEST");
+			} catch (Exception e) {
+				System.out.println("Fail to DROP PKG_REFCURSOR_TEST Package.");
 			}
-			catch (Exception e) {
-				System.out.println("Fail to DROP Package.");
+			
+			// 4. drop package
+			try{
+				statement.executeUpdate("DROP PACKAGE PKG_SYSREFCURSOR_TEST");
+			} catch (Exception e) {
+				System.out.println("Fail to DROP PKG_SYSREFCURSOR_TEST Package.");
 			}
-
-			// 4. create function for test
+			
+			// 5. drop table
+			try {
+				statement.executeUpdate("DROP TABLE PKG_SYSREFCURSOR_TABLE");
+			} catch (SQLException e) {
+				System.out.println("Fail to DROP Table.");
+			}
+			
+			// 6. create function for test
 			statement
 					.executeUpdate("create FUNCTION FUNC_RETURN_NUM (v_in1 IN number) RETURN number IS BEGIN return 1; END;");
 
-			// 5. create procedure for test
-			statement.executeUpdate("CREATE OR REPLACE PROCEDURE PROC_TOCHAR ( " + " OUT_RESULT OUT VARCHAR2, "
-					+ " IN_CONDITION IN VARCHAR2 " + " ) " + " AS " + " BEGIN " + " SELECT "
-					+ "      'Anyframe '||IN_CONDITION as RESULT into OUT_RESULT " + " FROM dual; " + " EXCEPTION "
-					+ " WHEN OTHERS THEN " + "      DBMS_OUTPUT.PUT_LINE( TO_CHAR(SQLCODE) || ' : ' || SQLERRM ); "
-					+ " END;");
+			// 7. create procedure for test
+			statement
+					.executeUpdate("CREATE OR REPLACE PROCEDURE PROC_TOCHAR ( "
+							+ " OUT_RESULT OUT VARCHAR2, "
+							+ " IN_CONDITION IN VARCHAR2 "
+							+ " ) "
+							+ " AS "
+							+ " BEGIN "
+							+ " SELECT "
+							+ "      'Anyframe '||IN_CONDITION as RESULT into OUT_RESULT "
+							+ " FROM dual; "
+							+ " EXCEPTION "
+							+ " WHEN OTHERS THEN "
+							+ "      DBMS_OUTPUT.PUT_LINE( TO_CHAR(SQLCODE) || ' : ' || SQLERRM ); "
+							+ " END;");
 
-			// 6. create package for test
+			// 8. create package for test
 			StringBuffer sql = new StringBuffer();
 			sql.append("CREATE OR REPLACE PACKAGE PKG_REFCURSOR_TEST AS ");
 			sql.append("TYPE dReport IS REF CURSOR; ");
@@ -120,7 +141,7 @@ public class XPQuerySerivceCallableStatementTest {
 			sql.append("END PKG_REFCURSOR_TEST;");
 			statement.executeUpdate(sql.toString());
 
-			// 7. create package body for test
+			// 9. create package body for test
 			sql = new StringBuffer();
 			sql.append("CREATE OR REPLACE PACKAGE BODY PKG_REFCURSOR_TEST AS ");
 			sql.append("PROCEDURE PROC_RECORD_SET( ");
@@ -143,16 +164,52 @@ public class XPQuerySerivceCallableStatementTest {
 			sql.append("END PROC_RECORD_SET; ");
 			sql.append("END PKG_REFCURSOR_TEST; ");
 			statement.executeUpdate(sql.toString());
-		}
-		catch (SQLException e) {
+			
+			// 10. create table for test
+			statement.executeUpdate("CREATE TABLE PKG_SYSREFCURSOR_TABLE ( "
+					+ "PKG_SYSREFCURSOR_TABLE_ID VARCHAR2(16) NOT NULL, "
+					+ "PKG_SYSREFCURSOR_TABLE_COLUMN1 VARCHAR2(16),"
+					+ "CONSTRAINT PK_PKG_SYSREFCURSOR_TABLE PRIMARY KEY (PKG_SYSREFCURSOR_TABLE_ID)"
+					+ ")" );
+			
+			// 11. insert test data into table
+			statement.executeUpdate("INSERT INTO PKG_SYSREFCURSOR_TABLE VALUES ('ID-0001', NULL) ");
+			
+			// 12. create package for test
+			sql = new StringBuffer();
+			sql.append("CREATE OR REPLACE PACKAGE PKG_SYSREFCURSOR_TEST AS ");
+			sql.append("PROCEDURE PROC_RECORD_SET_WITH_NULL( ");
+			sql.append("p_RecordSet OUT SYS_REFCURSOR ");
+			sql.append("); ");
+			sql.append("END PKG_SYSREFCURSOR_TEST;");
+			statement.executeUpdate(sql.toString());
+			
+			// 13. create package body for test
+			sql = new StringBuffer();
+			sql.append("CREATE OR REPLACE PACKAGE BODY PKG_SYSREFCURSOR_TEST AS ");
+			sql.append("PROCEDURE PROC_RECORD_SET_WITH_NULL( ");
+			sql.append("p_RecordSet           OUT SYS_REFCURSOR ");
+			sql.append(") AS ");
+			sql.append("BEGIN ");
+			sql.append("OPEN p_RecordSet FOR ");
+			sql.append("SELECT * FROM PKG_SYSREFCURSOR_TABLE where PKG_SYSREFCURSOR_TABLE_ID = 'ID-0001'; ");
+			sql.append("END PROC_RECORD_SET_WITH_NULL; ");
+			sql.append("END PKG_SYSREFCURSOR_TEST; ");
+			statement.executeUpdate(sql.toString());
+			
+		} catch (SQLException e) {
 			System.err.println("Unable to initialize database for test." + e);
 			Assert.fail("Unable to initialize database for test. " + e);
-		}
-		finally {
-			if (statement != null)
-				statement.close();
-			if (conn != null)
-				conn.close();
+		} finally {
+			try {
+				if (statement != null)
+					statement.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				System.err.println("Unable to initialize database for test."
+						+ e.getMessage());
+			}
 		}
 	}
 
@@ -161,10 +218,11 @@ public class XPQuerySerivceCallableStatementTest {
 	 * Function FUNC_RETURN_NUM를 호출하는 쿼리문을 실행시키고 결과값을 검증한다. 실행되는 쿼리문은 다음과 같다. {?
 	 * = call FUNC_RETURN_NUM(?)}
 	 * 
-	 * @throws Exception throws exception which is from QueryService
+	 * @throws QueryException
+	 *             throws exception which is from QueryService
 	 */
 	@Test
-	public void testFunction() throws Exception {
+	public void testFunction() {
 		// 1. set data for test
 
 		DataSet inDs = new DataSet("test");
@@ -174,12 +232,16 @@ public class XPQuerySerivceCallableStatementTest {
 		inDs.set(0, "inVal", new BigDecimal(1));
 
 		DataSetList outDl = xpQueryService.execute("callFunction", inDs);
-		DataSet outDs = outDl.get("callFunction0");
+		DataSet outDs = outDl.get("outVal0");
 
 		// 3 assert
-		Assert.assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
-		Assert.assertEquals("Fail to compare class type of outVal.", DataTypes.BIG_DECIMAL, outDs.getColumn(0).getDataType());
-		Assert.assertTrue("Fail to execute function.", outDs.getDouble(0, "outVal") == 1.0);
+		Assert
+				.assertTrue("Fail to execute function.",
+						outDs.getRowCount() == 1);
+		Assert.assertEquals("Fail to compare class type of outVal.",
+				DataTypes.BIG_DECIMAL, outDs.getColumn(0).getDataType());
+		Assert.assertTrue("Fail to execute function.", outDs.getDouble(0,
+				"outVal") == 1.0);
 	}
 
 	/**
@@ -187,10 +249,11 @@ public class XPQuerySerivceCallableStatementTest {
 	 * Procedure PROC_TOCHAR_SYSDATE를 호출하는 쿼리문을 실행시키고 결과값을 검증한다. 실행되는 쿼리문은 다음과
 	 * 같다. {call PROC_TOCHAR_SYSDATE (?,?)}
 	 * 
-	 * @throws Exception throws exception which is from QueryService
+	 * @throws QueryException
+	 *             throws exception which is from QueryService
 	 */
 	@Test
-	public void testProcedure() throws Exception {
+	public void testProcedure() {
 		// 1. set data for test
 		DataSet inDs = new DataSet("test");
 		inDs.addColumn("inVal", DataTypes.STRING);
@@ -201,13 +264,17 @@ public class XPQuerySerivceCallableStatementTest {
 
 		// 2. execute query
 		DataSetList outDl = xpQueryService.execute("callProcedure", inDs);
-		DataSet outDs = outDl.get("callProcedure0");
-		
-		// 3. assert
-		Assert.assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
-		Assert.assertEquals("Fail to compare class type of outVal.", DataTypes.STRING, outDs.getColumn(0).getDataType());
+		DataSet outDs = outDl.get("outVal0");
 
-		Assert.assertEquals("Anyframe XPQueryService Procedure Test", outDs.getString(0, "outVal"));
+		// 3. assert
+		Assert
+				.assertTrue("Fail to execute function.",
+						outDs.getRowCount() == 1);
+		Assert.assertEquals("Fail to compare class type of outVal.",
+				DataTypes.STRING, outDs.getColumn(0).getDataType());
+
+		Assert.assertEquals("Anyframe XPQueryService Procedure Test", outDs
+				.getString(0, "outVal"));
 	}
 
 	/**
@@ -215,10 +282,11 @@ public class XPQuerySerivceCallableStatementTest {
 	 * Package PKG_REFCURSOR_TEST.PROC_RECORD_SET를 호출하는 쿼리문을 실행시키고 결과값을 검증한다.
 	 * 실행되는 쿼리문은 다음과 같다. {call PKG_REFCURSOR_TEST.PROC_RECORD_SET(?, ?)}
 	 * 
-	 * @throws Exception throws exception which is from QueryService
+	 * @throws QueryException
+	 *             throws exception which is from QueryService
 	 */
 	@Test
-	public void testPackage() throws Exception {
+	public void testPackage() {
 		// 1. set data for test
 		DataSet inDs = new DataSet("test1");
 		inDs.addColumn("inVal", DataTypes.STRING);
@@ -228,33 +296,61 @@ public class XPQuerySerivceCallableStatementTest {
 
 		inDs.newRow();
 		inDs.set(1, "inVal", (String) null);
-		
+
 		// 2. execute query
 		DataSetList outDl = xpQueryService.execute("callPackage", inDs);
-		DataSet outDs1 = outDl.get("callPackage0");
-		DataSet outDs2 = outDl.get("callPackage1");
-		
+		DataSet outDs1 = outDl.get("outVal0");
+		DataSet outDs2 = outDl.get("outVal1");
+
 		// 3. assert
-		Assert.assertEquals("Fail to compare result size.", 3, outDs1.getRowCount());
-		Assert.assertEquals("Fail to compare result size.", 1, outDs2.getRowCount());
+		Assert.assertEquals("Fail to compare result size.", 3, outDs1
+				.getRowCount());
+		Assert.assertEquals("Fail to compare result size.", 1, outDs2
+				.getRowCount());
 
 		// 4. assert in detail
 		for (int i = 0; i < outDs1.getRowCount(); i++) {
 
-			Assert.assertEquals("Fail to compare a value of NAME column.", "KKN", outDs1.getString(i, "NAME"));
+			Assert.assertEquals("Fail to compare a value of NAME column.",
+					"KKN", outDs1.getString(i, "NAME"));
 			if (i == 0)
-				Assert.assertEquals("Fail to compare a value of STATUS column.", "ACTIVE", outDs1.getString(i, "STATUS"));
+				Assert.assertEquals(
+						"Fail to compare a value of STATUS column.", "ACTIVE",
+						outDs1.getString(i, "STATUS"));
 			else if (i == 1)
-				Assert.assertEquals("Fail to compare a value of STATUS column.", "READY", outDs1.getString(i, "STATUS"));
+				Assert.assertEquals(
+						"Fail to compare a value of STATUS column.", "READY",
+						outDs1.getString(i, "STATUS"));
 			else if (i == 2)
-				Assert.assertEquals("Fail to compare a value of STATUS column.", "BLOCK", outDs1.getString(i, "STATUS"));
+				Assert.assertEquals(
+						"Fail to compare a value of STATUS column.", "BLOCK",
+						outDs1.getString(i, "STATUS"));
 		}
 
 		// 5. assert in detail
 		for (int i = 0; i < outDs2.getRowCount(); i++) {
 
-			Assert.assertEquals("Fail to compare a value of NAME column.", "N/A", outDs2.getString(i, "NAME"));
-			Assert.assertEquals("Fail to compare a value of STATUS column.", "BLOCK", outDs2.getString(i, "STATUS"));
+			Assert.assertEquals("Fail to compare a value of NAME column.",
+					"N/A", outDs2.getString(i, "NAME"));
+			Assert.assertEquals("Fail to compare a value of STATUS column.",
+					"BLOCK", outDs2.getString(i, "STATUS"));
 		}
+	}
+	
+	/**
+	 * [Flow #-4] Positive Case : XPQueryService의 execute() 메소드를 통해 DBMS에 정의된
+	 * Package PKG_SYSREFCURSOR_TEST.PROC_RECORD_SET_WITH_NULL를 호출하는 쿼리문을 실행시키고 결과값을 검증한다.
+	 * 이때 Return 되는 결과 Column중 Null이 포함된 경우, nullChecks에 의해서 정상적으로 null이 blank('')로 치환 되는지를 검증한다.
+	 * (기존의 NullPointerException이 발생하던 오류를 수정(2012.10.4))
+	 * 
+	 */
+	@Test
+	public void testPackageWithNullValue() {
+
+		DataSetList outDl = xpQueryService.execute("callPackageWithNullValue");
+		DataSet outDs1 = outDl.get("outVal0");
+		
+		Assert.assertEquals("Fail to compare result size.", 1, outDs1
+				.getRowCount());
 	}
 }

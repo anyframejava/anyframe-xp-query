@@ -18,6 +18,7 @@ package org.anyframe.xp.query.web.controller;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -38,6 +39,7 @@ import com.tobesoft.xplatform.tx.PlatformRequest;
  * </ul>
  * 
  * @author Jonghoon Kim
+ * @deprecated
  */
 public class AbstractXPDispatchController extends AbstractXPController {
 	/**
@@ -45,7 +47,7 @@ public class AbstractXPDispatchController extends AbstractXPController {
 	 * method name. This collection is populated as different methods are
 	 * called, so that introspection needs to occur only once per method name.
 	 */
-	protected HashMap<String, Object> methods = new HashMap<String, Object>();
+	protected Map<String, Object> methods = new HashMap<String, Object>();
 
 	/**
 	 * The Class instance of this <code>AnyframeMiPDispatchConroller</code>
@@ -58,8 +60,7 @@ public class AbstractXPDispatchController extends AbstractXPController {
 	 * method name. This collection is populated as different methods are
 	 * called, so that introspection needs to occur only once per method name.
 	 */
-	@SuppressWarnings("unchecked")
-	protected Class[] types = { HttpPlatformRequest.class, VariableList.class,
+	protected Class<?>[] types = { HttpPlatformRequest.class, VariableList.class,
 			DataSetList.class, VariableList.class, DataSetList.class };
 
 	/**

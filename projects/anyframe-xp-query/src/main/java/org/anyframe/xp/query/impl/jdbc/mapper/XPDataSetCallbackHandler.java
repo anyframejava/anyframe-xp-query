@@ -30,7 +30,8 @@ import com.tobesoft.xplatform.data.DataTypes;
  * 
  * @author Soyon Lim
  */
-public class XPDataSetCallbackHandler extends XPCallbackSupport implements RiaRowCallback {
+public class XPDataSetCallbackHandler extends XPCallbackSupport implements
+		RiaRowCallback {
 
 	private int rowCount;
 
@@ -44,11 +45,10 @@ public class XPDataSetCallbackHandler extends XPCallbackSupport implements RiaRo
 	public XPDataSetCallbackHandler() {
 
 	}
-	
+
 	public void setDataSet(Object dataSet) {
 		this.dataSet = (DataSet) dataSet;
 	}
-
 
 	public XPDataSetCallbackHandler(DataSet dataSet, QueryInfo queryInfo) {
 		this.dataSet = dataSet;
@@ -62,23 +62,28 @@ public class XPDataSetCallbackHandler extends XPCallbackSupport implements RiaRo
 		this.fieldNames = new String[this.columnCount];
 		dataSet.setChangeStructureWithData(true);
 		dataSet.addColumn("_chk", DataTypes.STRING, 256);
-		
+
 		if (pagination.isPaging()) {
-			dataSet.addConstantColumn("totalCount", pagination.getRecordCount());
+			dataSet
+					.addConstantColumn("totalCount", pagination
+							.getRecordCount());
 			dataSet.addConstantColumn("pageIndex", pagination.getPageIndex());
 			dataSet.addConstantColumn("pageCount", pagination.getPageCount());
 			dataSet.addConstantColumn("pageSize", pagination.getPageSize());
 		}
 
 		for (int i = 0; i < this.columnCount; i++) {
-			String fieldName = getMappingStylekey(queryInfo, rsmd.getColumnLabel(i + 1));
-			
+			String fieldName = getMappingStylekey(queryInfo, rsmd
+					.getColumnLabel(i + 1));
+
 			int colPrecision = rsmd.getPrecision(i + 1);
-			
-			if(colPrecision == -1) {
-				dataSet.addColumn(fieldName, getDsType(rsmd.getColumnType(i + 1)));
+
+			if (colPrecision == -1) {
+				dataSet.addColumn(fieldName, getDsType(rsmd
+						.getColumnType(i + 1)));
 			} else {
-				dataSet.addColumn(fieldName, getDsType(rsmd.getColumnType(i + 1)), colPrecision);
+				dataSet.addColumn(fieldName, getDsType(rsmd
+						.getColumnType(i + 1)), colPrecision);
 			}
 
 			this.columnTypes[i] = rsmd.getColumnType(i + 1);
@@ -90,7 +95,8 @@ public class XPDataSetCallbackHandler extends XPCallbackSupport implements RiaRo
 
 		dataSet.newRow();
 		for (int i = 1; i <= columnCount; i++) {
-			dataSet.set(rowCount, fieldNames[i - 1], getValues(rs, i, columnTypes[i - 1]));
+			dataSet.set(rowCount, fieldNames[i - 1], getValues(rs, i,
+					columnTypes[i - 1]));
 		}
 		rowCount++;
 	}

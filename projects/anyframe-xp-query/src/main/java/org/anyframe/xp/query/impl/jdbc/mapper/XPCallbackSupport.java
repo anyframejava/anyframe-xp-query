@@ -15,9 +15,9 @@
  */
 package org.anyframe.xp.query.impl.jdbc.mapper;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
+import org.anyframe.exception.NotSupportedColumnTypeException;
 import org.anyframe.query.ria.AbstractCallbackSupport;
 
 import com.tobesoft.xplatform.data.DataSet;
@@ -29,19 +29,20 @@ import com.tobesoft.xplatform.data.DataTypes;
  * @author Soyon Lim
  * @author JongHoon Kim
  */
-public class XPCallbackSupport extends AbstractCallbackSupport{
+public class XPCallbackSupport extends AbstractCallbackSupport {
 
 	protected DataSet dataSet = null;
-	
+
 	public void setDataSet(DataSet dataSet) {
 		this.dataSet = dataSet;
 	}
 
-	protected short getDsType(int rsType) throws SQLException {
+	protected short getDsType(int rsType) {
 		short type = DataTypes.STRING;
 		switch (rsType) {
 		case Types.ARRAY:
-			throw new SQLException("Query Service : Not supported SQL type.");
+			throw new NotSupportedColumnTypeException(
+					"Query Service : Not supported SQL type.");
 		case Types.BIGINT:
 			type = DataTypes.LONG;
 			break;
@@ -49,7 +50,6 @@ public class XPCallbackSupport extends AbstractCallbackSupport{
 			type = DataTypes.BLOB;
 			break;
 		case Types.BIT:
-			//throw new SQLException("Query Service : Not supported SQL type.");
 			type = DataTypes.BOOLEAN;
 			break;
 		case Types.CHAR:
@@ -68,7 +68,8 @@ public class XPCallbackSupport extends AbstractCallbackSupport{
 			type = DataTypes.BIG_DECIMAL;
 			break;
 		case Types.DISTINCT:
-			throw new SQLException("Query Service : Not supported SQL type.");
+			throw new NotSupportedColumnTypeException(
+					"Query Service : Not supported SQL type.");
 		case Types.DOUBLE:
 			type = DataTypes.DOUBLE;
 			break;
@@ -79,49 +80,45 @@ public class XPCallbackSupport extends AbstractCallbackSupport{
 			type = DataTypes.INT;
 			break;
 		case Types.JAVA_OBJECT:
-			throw new SQLException("Query Service : Not supported SQL type.");
+			throw new NotSupportedColumnTypeException(
+					"Query Service : Not supported SQL type.");
 		case Types.LONGVARBINARY:
-			//type = DataTypes.UNDEFINED;
 			type = DataTypes.BLOB;
 			break;
 		case Types.LONGVARCHAR:
 			type = DataTypes.STRING;
 			break;
 		case Types.NULL:
-			//throw new SQLException("Query Service : Not supported SQL type.");
 			type = DataTypes.NULL;
 			break;
 		case Types.NUMERIC:
 			type = DataTypes.BIG_DECIMAL;
 			break;
 		case Types.OTHER:
-			//throw new SQLException("Query Service : Not supported SQL type.");
 			type = DataTypes.BIG_DECIMAL;
 			break;
 		case Types.REAL:
-			//throw new SQLException("Query Service : Not supported SQL type.");
 			type = DataTypes.BIG_DECIMAL;
 			break;
 		case Types.REF:
-			throw new SQLException("Query Service : Not supported SQL type.");
+			throw new NotSupportedColumnTypeException(
+					"Query Service : Not supported SQL type.");
 		case Types.SMALLINT:
 			type = DataTypes.INT;
 			break;
 		case Types.STRUCT:
-			throw new SQLException("Query Service : Not supported SQL type.");
+			throw new NotSupportedColumnTypeException(
+					"Query Service : Not supported SQL type.");
 		case Types.TIME:
-			//type = DataTypes.UNDEFINED;
 			type = DataTypes.TIME;
 			break;
 		case Types.TIMESTAMP:
 			type = DataTypes.UNDEFINED;
 			break;
 		case Types.TINYINT:
-			//type = DataTypes.UNDEFINED;
 			type = DataTypes.INT;
 			break;
 		case Types.VARBINARY:
-			//type = DataTypes.UNDEFINED;
 			type = DataTypes.BLOB;
 			break;
 		case Types.VARCHAR:

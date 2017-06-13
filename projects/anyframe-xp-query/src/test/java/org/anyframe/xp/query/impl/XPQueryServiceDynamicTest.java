@@ -52,7 +52,7 @@ public class XPQueryServiceDynamicTest {
 	 * 테스트를 위한 기본 테이블 생성 및 기본 데이터 입력
 	 */
 	@Before
-	public void onSetUp() throws Exception {
+	public void onSetUp() {
 		// super.onSetUp();
 		try {
 			Connection conn = dataSource.getConnection();
@@ -83,7 +83,7 @@ public class XPQueryServiceDynamicTest {
 	}
 
 	@Test
-	public void testDynamicWithForEachVariableList() throws Exception {
+	public void testDynamicWithForEachVariableList() {
 		List<String> logonIdList = new ArrayList<String>();
 		logonIdList.add("admin");
 		logonIdList.add("test");
@@ -103,7 +103,7 @@ public class XPQueryServiceDynamicTest {
 	}
 
 	@Test
-	public void testDynamicQueryUsingTextReplaceVariableList() throws Exception {
+	public void testDynamicQueryUsingTextReplaceVariableList() {
 		// 1. set data for test
 		VariableList variableList = new VariableList();
 
@@ -125,7 +125,7 @@ public class XPQueryServiceDynamicTest {
 	}
 
 	@Test
-	public void testDynamicQueryUsingIfVariableList() throws Exception {
+	public void testDynamicQueryUsingIfVariableList() {
 
 		// SEARCH_CONDITION이 NULL일 때
 		// 1. set data for test
@@ -167,7 +167,7 @@ public class XPQueryServiceDynamicTest {
 	}
 
 	@Test
-	public void testDynamicQueryUsingIfDataSet() throws Exception {
+	public void testDynamicQueryUsingIfDataSet() {
 
 		// SEARCH_CONDITION이 NULL일 때
 		// 1. set data for test

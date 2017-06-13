@@ -16,12 +16,13 @@
 package org.anyframe.xp.query.impl;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.anyframe.query.QueryInfo;
-import org.anyframe.query.QueryServiceException;
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.query.impl.jdbc.setter.DefaultDynamicSqlParameterSource;
 import org.anyframe.query.ria.AbstractRiaQueryService;
 import org.anyframe.query.ria.RiaCallableStatementCallback;
@@ -49,7 +50,8 @@ import com.tobesoft.xplatform.data.VariableList;
  * 
  * @author Soyon Lim
  */
-public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQueryService, InitializingBean {
+public class XPQueryServiceImpl extends AbstractRiaQueryService implements
+		XPQueryService, InitializingBean { 
 
 	public RiaRowCallback getRowCallbackHandler() {
 		return null;
@@ -63,11 +65,13 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		return null;
 	}
 
-	public DataSet search(String queryId, final DataSet dataSet) throws Exception {
+	public DataSet search(String queryId, final DataSet dataSet)
+			throws QueryException {
 		this.containesQueryId(queryId);
 		DataSet rtDataSet = new DataSet("Anyframe");
 		ColumnValueExtractor updateColumnValueExtractor = new ColumnValueExtractor() {
-			public Object getValue(DataSet dataset, int rowNum, String columnName) {
+			public Object getValue(DataSet dataset, int rowNum,
+					String columnName) {
 				return dataset.getObject(rowNum, columnName);
 			}
 		};
@@ -78,17 +82,19 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 			xpRowCallbackHandler = new XPDataSetCallbackHandler();
 		}
 
-		QueryInfo queryInfo = (QueryInfo) sqlRepository.getQueryInfos().get(queryId);
+		QueryInfo queryInfo = sqlRepository.getQueryInfos().get(queryId);
 
 		xpRowCallbackHandler.setDataSet(rtDataSet);
 		xpRowCallbackHandler.setQueryInfo(queryInfo);
 
-		this.search(queryId, new XPDataSetSQLParameterSource(dataSet, 0, updateColumnValueExtractor), xpRowCallbackHandler);
+		this.search(queryId, new XPDataSetSQLParameterSource(dataSet, 0,
+				updateColumnValueExtractor), xpRowCallbackHandler);
 
 		return rtDataSet;
 	}
 
-	public DataSet search(String queryId, final VariableList variableList) throws Exception {
+	public DataSet search(String queryId, final VariableList variableList)
+			throws QueryException {
 		this.containesQueryId(queryId);
 		DataSet rtDataSet = new DataSet("Anyframe");
 
@@ -98,16 +104,18 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 			xpRowCallbackHandler = new XPDataSetCallbackHandler();
 		}
 
-		QueryInfo queryInfo = (QueryInfo) sqlRepository.getQueryInfos().get(queryId);
+		QueryInfo queryInfo = sqlRepository.getQueryInfos().get(queryId);
 
 		xpRowCallbackHandler.setDataSet(rtDataSet);
 		xpRowCallbackHandler.setQueryInfo(queryInfo);
 
-		this.search(queryId, new XPVariantSqlParameterSource(variableList), xpRowCallbackHandler);
+		this.search(queryId, new XPVariantSqlParameterSource(variableList),
+				xpRowCallbackHandler);
 		return rtDataSet;
 	}
 
-	public DataSet search(String queryId, final VariableList variableList, int pageIndex, int pageSize) throws Exception {
+	public DataSet search(String queryId, final VariableList variableList,
+			int pageIndex, int pageSize) throws QueryException {
 		this.containesQueryId(queryId);
 		DataSet rtDataSet = new DataSet("Anyframe");
 
@@ -117,16 +125,18 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 			xpRowCallbackHandler = new XPDataSetCallbackHandler();
 		}
 
-		QueryInfo queryInfo = (QueryInfo) sqlRepository.getQueryInfos().get(queryId);
+		QueryInfo queryInfo = sqlRepository.getQueryInfos().get(queryId);
 
 		xpRowCallbackHandler.setDataSet(rtDataSet);
 		xpRowCallbackHandler.setQueryInfo(queryInfo);
 
-		this.search(queryId, new XPVariantSqlParameterSource(variableList), xpRowCallbackHandler, pageIndex, pageSize);
+		this.search(queryId, new XPVariantSqlParameterSource(variableList),
+				xpRowCallbackHandler, pageIndex, pageSize);
 		return rtDataSet;
 	}
 
-	public DataSet searchWithPaging(String queryId, final DataSet dataSet) throws Exception {
+	public DataSet searchWithPaging(String queryId, final DataSet dataSet)
+			throws QueryException {
 		this.containesQueryId(queryId);
 		int pageIndex = 0;
 		int pageSize = 0;
@@ -135,50 +145,177 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 			pageSize = dataSet.getInt(0, "pageSize");
 		} catch (Exception e) {
 			if (e instanceof NullPointerException) {
-				throw new QueryServiceException("Query Service : there is no parameter for paging, \"pageIndex\" or \"pageSize\" must be null.");
+				throw new QueryException(
+						"Query Service : there is no parameter for paging, \"pageIndex\" or \"pageSize\" must be null.");
 			}
 		}
 
 		DataSet rtDataSet = new DataSet("Anyframe");
 		ColumnValueExtractor updateColumnValueExtractor = new ColumnValueExtractor() {
-			public Object getValue(DataSet dataset, int rowNum, String columnName) {
+			public Object getValue(DataSet dataset, int rowNum,
+					String columnName) {
 				return dataset.getObject(rowNum, columnName);
 			}
 		};
-		this.search(queryId, new XPDataSetSQLParameterSource(dataSet, 0, updateColumnValueExtractor), new XPDataSetCallbackHandler(rtDataSet,
-				(QueryInfo) sqlRepository.getQueryInfos().get(queryId)), pageIndex, pageSize);
+		this.search(queryId, new XPDataSetSQLParameterSource(dataSet, 0,
+				updateColumnValueExtractor), new XPDataSetCallbackHandler(
+				rtDataSet, sqlRepository.getQueryInfos().get(queryId)),
+				pageIndex, pageSize);
 		return rtDataSet;
 	}
 
-	@SuppressWarnings("unchecked")
-	public int update(String queryId, VariableList variableList, Map queryMap, DataSet dataSet) throws QueryServiceException {
-		return update(queryId, variableList, queryMap, dataSet, new DefaultXPActionCommand());
+	public int update(String queryId, VariableList variableList,
+			Map<String, String> queryMap, DataSet dataSet)
+			throws QueryException {
+		return update(queryId, variableList, queryMap, dataSet,
+				new DefaultXPActionCommand());
 	}
 
-	@SuppressWarnings("unchecked")
-	public int update(Map queryMap, DataSet dataSet) throws QueryServiceException {
+	public int update(Map<String, String> queryMap, DataSet dataSet)
+			throws QueryException {
 		return update(queryMap, dataSet, new DefaultXPActionCommand());
 	}
-	
-	@SuppressWarnings("unchecked")
-	public int update(Map queryMap, DataSet dataSet, XPActionCommand actionCommand) throws QueryServiceException {
+
+	public int update(Map<String, String> queryMap, DataSet dataSet,
+			XPActionCommand actionCommand) throws QueryException {
 		return update(new InternalMap(queryMap, actionCommand), dataSet);
 	}
 
-	public int update(String queryId, VariableList variableList) throws QueryServiceException {
+	public int update(String queryId, VariableList variableList)
+			throws QueryException {
 		this.containesQueryId(queryId);
-		return this.update(queryId, new XPVariantSqlParameterSource(variableList));
+		return this.update(queryId, new XPVariantSqlParameterSource(
+				variableList));
 	}
 
-	@SuppressWarnings("unchecked")
-	public int update(String queryId, VariableList variableList, Map queryMap, DataSet dataSet, XPActionCommand actionCommand) throws QueryServiceException {
+	public int update(String queryId, VariableList variableList,
+			Map<String, String> queryMap, DataSet dataSet,
+			XPActionCommand actionCommand) throws QueryException {
 		int updateCount = 0;
 		updateCount += update(queryId, variableList);
 		updateCount += update(new InternalMap(queryMap, actionCommand), dataSet);
 		return updateCount;
 	}
 
-	private int update(InternalMap queryMap, DataSet dataSet) throws QueryServiceException {
+	public int batchCreate(String queryId, DataSet dataSet)
+			throws QueryException {
+		int rowCount = dataSet.getRowCount();
+
+		ColumnValueExtractor columnValueExtractor = new ColumnValueExtractor() {
+			private boolean isConstColumnExist = false;
+
+			private boolean initFlag = false;
+
+			public Object getValue(DataSet dataSet, int rowNum,
+					String columnName) {
+				if (!initFlag) {
+					isConstColumnExist = checkConstColumnExist(dataSet);
+					initFlag = true;
+				}
+				return getValueByColumnType(dataSet, rowNum, columnName,
+						isConstColumnExist);
+			}
+
+			private boolean checkConstColumnExist(DataSet dataSet) {
+				for (int i = 0; i < dataSet.getColumnCount(); i++) {
+					if (dataSet.getColumn(i).isConstant()) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+		List<XPDataSetSQLParameterSource> insertParamList = new ArrayList<XPDataSetSQLParameterSource>();
+
+		for (int i = 0; i < rowCount; i++) {
+			if (dataSet.getRowType(i) == DataSet.ROW_TYPE_INSERTED) {
+				insertParamList.add(new XPDataSetSQLParameterSource(dataSet, i,
+						columnValueExtractor));
+			}
+		}
+
+		XPDataSetSQLParameterSource[] insertParameterSource = new XPDataSetSQLParameterSource[] {};
+		insertParameterSource = insertParamList.toArray(insertParameterSource);
+
+		return batchUpdateCount(update(queryId, insertParameterSource));
+	}
+
+	public int batchUpdate(String queryId, DataSet dataSet)
+			throws QueryException {
+		int rowCount = dataSet.getRowCount();
+
+		ColumnValueExtractor columnValueExtractor = new ColumnValueExtractor() {
+			private boolean isConstColumnExist = false;
+
+			private boolean initFlag = false;
+
+			public Object getValue(DataSet dataSet, int rowNum,
+					String columnName) {
+				if (!initFlag) {
+					isConstColumnExist = checkConstColumnExist(dataSet);
+					initFlag = true;
+				}
+				return getValueByColumnType(dataSet, rowNum, columnName,
+						isConstColumnExist);
+			}
+
+			private boolean checkConstColumnExist(DataSet dataSet) {
+				for (int i = 0; i < dataSet.getColumnCount(); i++) {
+					if (dataSet.getColumn(i).isConstant()) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+		List<XPDataSetSQLParameterSource> updateParamList = new ArrayList<XPDataSetSQLParameterSource>();
+
+		for (int i = 0; i < rowCount; i++) {
+			if (dataSet.getRowType(i) == DataSet.ROW_TYPE_UPDATED) {
+				updateParamList.add(new XPDataSetSQLParameterSource(dataSet, i,
+						columnValueExtractor));
+			}
+		}
+
+		XPDataSetSQLParameterSource[] updateParameterSource = new XPDataSetSQLParameterSource[] {};
+		updateParameterSource = updateParamList.toArray(updateParameterSource);
+
+		return batchUpdateCount(update(queryId, updateParameterSource));
+	}
+
+	public int batchRemove(String queryId, DataSet dataSet)
+			throws QueryException {
+		int rowCount = dataSet.getRemovedRowCount();
+
+		ColumnValueExtractor columnValueExtractor = new ColumnValueExtractor() {
+			public Object getValue(DataSet dataSet, int rowNum,
+					String columnName) {
+				return dataSet.getRemovedData(rowNum, columnName);
+			}
+		};
+
+		XPDataSetSQLParameterSource[] deleteParameterSource = new XPDataSetSQLParameterSource[rowCount];
+
+		for (int i = 0; i < rowCount; i++) {
+			deleteParameterSource[i] = new XPDataSetSQLParameterSource(dataSet,
+					i, columnValueExtractor);
+		}
+
+		return batchUpdateCount(update(queryId, deleteParameterSource));
+	}
+
+	private int batchUpdateCount(int[] cnt) {
+		int sum = 0;
+		for (int arrayLength = 0; arrayLength < cnt.length; arrayLength++) {
+			sum += cnt[arrayLength];
+		}
+		return sum;
+	}
+
+	private int update(InternalMap queryMap, DataSet dataSet)
+			throws QueryException {
 		int totalUpdateCount = 0;
 		// DataSet에 들어있는 모든 데이터 중 STATUS가 INSERT,
 		// UPDATE인 데이터의 건수
@@ -188,13 +325,15 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		int deleteRowCount = dataSet.getRemovedRowCount();
 
 		ColumnValueExtractor columnValueExtractor = new ColumnValueExtractor() {
-			public Object getValue(DataSet dataSet, int rowNum, String columnName) {
+			public Object getValue(DataSet dataSet, int rowNum,
+					String columnName) {
 				return dataSet.getRemovedData(rowNum, columnName);
 			}
 		};
 
 		for (int i = 0; i < deleteRowCount; i++) {
-			totalUpdateCount += updateDataSet(queryMap, dataSet, i, QUERY_DELETE, columnValueExtractor);
+			totalUpdateCount += updateDataSet(queryMap, dataSet, i,
+					QUERY_DELETE, columnValueExtractor);
 		}
 
 		columnValueExtractor = new ColumnValueExtractor() {
@@ -202,12 +341,14 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 
 			private boolean initFlag = false;
 
-			public Object getValue(DataSet dataSet, int rowNum, String columnName) {
+			public Object getValue(DataSet dataSet, int rowNum,
+					String columnName) {
 				if (!initFlag) {
 					isConstColumnExist = checkConstColumnExist(dataSet);
 					initFlag = true;
 				}
-				return getValueByColumnType(dataSet, rowNum, columnName, isConstColumnExist);
+				return getValueByColumnType(dataSet, rowNum, columnName,
+						isConstColumnExist);
 			}
 
 			private boolean checkConstColumnExist(DataSet dataSet) {
@@ -221,7 +362,8 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		};
 
 		for (int i = 0; i < updateRowCount; i++) {
-			totalUpdateCount += updateDataSet(queryMap, dataSet, i, getDsRowStatus(dataSet.getRowType(i)), columnValueExtractor);
+			totalUpdateCount += updateDataSet(queryMap, dataSet, i,
+					getDsRowStatus(dataSet.getRowType(i)), columnValueExtractor);
 		}
 		return totalUpdateCount;
 	}
@@ -240,62 +382,77 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		}
 	}
 
-	public DataSetList execute(String queryId) throws QueryServiceException {
+	public DataSetList execute(String queryId) throws QueryException {
 		DataSet dataset = new DataSet();
 		return execute(queryId, dataset);
 	}
 
-	public DataSetList execute(String queryId, DataSet dataset) throws QueryServiceException {
+	public DataSetList execute(String queryId, DataSet dataSet)
+			throws QueryException {
 
 		DataSetList datasetList = new DataSetList();
 		this.containesQueryId(queryId);
 
 		RiaCallableStatementCallback callableStatementCallbackHandler = getCallableStatementCallbackHandler();
-
+		
 		if (callableStatementCallbackHandler == null) {
 			callableStatementCallbackHandler = new XPCallableStatementCallbackHandler();
 		}
 
 		ColumnValueExtractor columnValueExtractor = new ColumnValueExtractor() {
-			public Object getValue(DataSet dataset, int rowNum, String columnName) {
+			public Object getValue(DataSet dataset, int rowNum,
+					String columnName) {
 				return dataset.getObject(rowNum, columnName);
 			}
 		};
 
 		// 조회 조건이 없을 경우 Dataset Id는 queryId + 0
-		if (dataset == null || dataset.getRowCount() == 0) {
-			dataset = new DataSet();
-			DataSet resultDs = (DataSet) this.execute(queryId, new XPDataSetSQLParameterSource(dataset, 0, columnValueExtractor),
+		if (dataSet == null || dataSet.getRowCount() == 0) {
+			dataSet = new DataSet();
+			DataSetList resultDl = (DataSetList) this.execute(queryId,
+					new XPDataSetSQLParameterSource(dataSet, 0,
+							columnValueExtractor),
 					callableStatementCallbackHandler);
-			if (resultDs != null) {
-				resultDs.setName(queryId + 0);
-				datasetList.add(resultDs);
+			if (resultDl != null) {
+				for (int j = 0; j < resultDl.size(); j++) {
+					DataSet outDs = resultDl.get(j);
+					outDs.setName(outDs.getName() + 0);
+					datasetList.add(outDs);
+				}
 			}
 		} else {
 			// input Dataset여러 row일 경우 각 row의 실행 결과 Dataset Id는 queryId + row가
 			// 된다.
-			for (int i = 0; i < dataset.getRowCount(); i++) {
-				DataSet resultDs = (DataSet) this.execute(queryId, new XPDataSetSQLParameterSource(dataset, i, columnValueExtractor),
+			for (int i = 0; i < dataSet.getRowCount(); i++) {
+				DataSetList resultDl = (DataSetList) this.execute(queryId,
+						new XPDataSetSQLParameterSource(dataSet, i,
+								columnValueExtractor),
 						callableStatementCallbackHandler);
-				if (resultDs != null) {
-					resultDs.setName(queryId + i);
-					datasetList.add(resultDs);
+				if (resultDl != null) {
+					for (int j = 0; j < resultDl.size(); j++) {
+						DataSet outDs = resultDl.get(j);
+						outDs.setName(outDs.getName() + i);
+						datasetList.add(outDs);
+					}
 				}
 			}
 		}
 		return datasetList;
 	}
 
-	private int updateDataSet(InternalMap queryMap, DataSet dataSet, int rowNum, String rowStatus, ColumnValueExtractor columnValueExtractor)
-			throws QueryServiceException {
+	private int updateDataSet(InternalMap queryMap, DataSet dataSet,
+			int rowNum, String rowStatus,
+			ColumnValueExtractor columnValueExtractor) throws QueryException {
 		int totalUpdateCount = 0;
-		String queryId = (String) queryMap.get(rowStatus);
+		String queryId = queryMap.get(rowStatus);
 
 		// Query Map에 ID가 정의 되어 있지 않을 경우에는 정의된 Query만 실행
 		if (queryId != null) {
 			Command command = queryMap.getCommand(rowStatus);
 			command.preExecute(dataSet, rowNum);
-			totalUpdateCount += this.update(queryId, new XPDataSetSQLParameterSource(dataSet, rowNum, columnValueExtractor));
+			totalUpdateCount += this.update(queryId,
+					new XPDataSetSQLParameterSource(dataSet, rowNum,
+							columnValueExtractor));
 			command.postExecute(dataSet, rowNum);
 
 		}
@@ -303,9 +460,11 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		return totalUpdateCount;
 	}
 
-	private Object getValueByColumnType(DataSet dataSet, int rowNum, String columnName, boolean isConstColumnExist) {
+	private Object getValueByColumnType(DataSet dataSet, int rowNum,
+			String columnName, boolean isConstColumnExist) {
 		try {
-			if (isConstColumnExist && dataSet.getColumn(columnName).isConstant()) {
+			if (isConstColumnExist
+					&& dataSet.getColumn(columnName).isConstant()) {
 				return dataSet.getObject(0, columnName);
 			}
 			if (dataSet.getColumn(columnName).getDataType() == DataTypes.BLOB) {
@@ -317,7 +476,9 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		} catch (Exception e) {
 			Logger LOGGER = LoggerFactory.getLogger(XPQueryService.class);
 			if (e instanceof NullPointerException) {
-				LOGGER.debug("Query Service : cannot find '{} ' column in Data.", new Object[] { columnName });
+				LOGGER.debug(
+						"Query Service : cannot find '{} ' column in Data.",
+						new Object[] { columnName });
 			} else {
 				LOGGER.debug(e.getMessage());
 			}
@@ -331,13 +492,12 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		void postExecute(DataSet dataSet, int currentRow);
 	}
 
-	@SuppressWarnings("unchecked")
-	class InternalMap extends HashMap {
+	class InternalMap extends HashMap<String, String> {
 		private static final long serialVersionUID = 1L;
 
-		private XPActionCommand actionCommand = null;
+		private final XPActionCommand actionCommand;
 
-		InternalMap(Map queries, XPActionCommand actionCommand) {
+		InternalMap(Map<String, String> queries, XPActionCommand actionCommand) {
 			super(queries);
 			this.actionCommand = actionCommand;
 		}
@@ -395,14 +555,17 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		}
 	}
 
-	public void search(String queryId, VariableList variableList, int pageIndex, int pageSize, String dataSetName, PrintWriter writer) throws Exception {
+	public void search(String queryId, VariableList variableList,
+			int pageIndex, int pageSize, String dataSetName, PrintWriter writer)
+			throws QueryException {
 
 		this.containesQueryId(queryId);
 
 		RiaPrintWriterCallback xPPrintWriterRowCallbackHandler = getPrintWriterRowCallbackHandler();
 
 		if (xPPrintWriterRowCallbackHandler == null) {
-			xPPrintWriterRowCallbackHandler = new XPPrintWriterCallbackHandler(writer, (QueryInfo) sqlRepository.getQueryInfos().get(queryId));
+			xPPrintWriterRowCallbackHandler = new XPPrintWriterCallbackHandler(
+					writer, sqlRepository.getQueryInfos().get(queryId));
 		}
 
 		String encoding = xPPrintWriterRowCallbackHandler.getEncoding();
@@ -411,21 +574,23 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements XPQue
 		writer.write("ErrorCode=0\n");
 		writer.write("query_id=" + queryId + ",svc_status=y\n");
 		writer.write("Dataset:" + dataSetName + "\n");
-		this.search(queryId, new XPVariantSqlParameterSource(variableList), xPPrintWriterRowCallbackHandler, pageIndex, pageSize);
+		this.search(queryId, new XPVariantSqlParameterSource(variableList),
+				xPPrintWriterRowCallbackHandler, pageIndex, pageSize);
 		writer.write("\n");
 
 	}
 
-	@SuppressWarnings("unchecked")
-	protected Map generatePropertiesMap(Object[] values, int[] types, DefaultDynamicSqlParameterSource sqlParameterSource) throws QueryServiceException {
+	protected Map<Object, Object> generatePropertiesMap(Object[] values,
+			int[] types, DefaultDynamicSqlParameterSource sqlParameterSource)
+			throws QueryException {
 
-		Map properties = new HashMap();
+		Map<Object, Object> properties = new HashMap<Object, Object>();
 
 		if (sqlParameterSource instanceof XPVariantSqlParameterSource) {
 			XPVariantSqlParameterSource sqlParam = (XPVariantSqlParameterSource) sqlParameterSource;
 			VariableList vl = sqlParam.getVariableList();
 
-			List list = vl.keyList();
+			List<?> list = vl.keyList();
 
 			for (int i = 0; i < list.size(); i++) {
 				String key = (String) list.get(i);

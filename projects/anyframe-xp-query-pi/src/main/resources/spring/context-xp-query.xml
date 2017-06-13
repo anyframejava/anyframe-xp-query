@@ -42,7 +42,7 @@
     	<constructor-arg ref="xpJdbcTemplate"/>
     </bean> 
     
-	<bean name="xpSqlLoader" class="org.anyframe.query.impl.config.loader.SQLLoader">
+	<bean name="xpSqlLoader" class="org.anyframe.query.impl.config.loader.MappingXMLLoader">
 		<property name="mappingFiles">
 			<value>classpath:/sql/xp-query/mapping-*.xml</value>
 		</property>

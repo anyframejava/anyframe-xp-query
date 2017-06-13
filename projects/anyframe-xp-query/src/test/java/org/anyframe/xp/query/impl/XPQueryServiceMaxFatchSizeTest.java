@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 
 import junit.framework.Assert;
 
-import org.anyframe.query.QueryServiceException;
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.xp.query.XPQueryService;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +74,7 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * 테스트를 위한 기본 테이블 생성 및 기본 데이터 입력
 	 */
 	@Before
-	public void onSetUp() throws Exception {
+	public void onSetUp() {
 
 		try {
 			Connection conn = dataSource.getConnection();
@@ -87,7 +87,9 @@ public class XPQueryServiceMaxFatchSizeTest {
 					System.out.println("Fail to DROP Table.");
 				}
 
-				statement.executeUpdate("CREATE TABLE TB_XP_CUSTOMER ( " + "SSNO varchar2(13) NOT NULL, " + "NAME varchar2(20), " + "ADDRESS varchar2(20), "
+				statement.executeUpdate("CREATE TABLE TB_XP_CUSTOMER ( "
+						+ "SSNO varchar2(13) NOT NULL, "
+						+ "NAME varchar2(20), " + "ADDRESS varchar2(20), "
 						+ "PRIMARY KEY (SSNO))");
 			} finally {
 				conn.close();
@@ -106,15 +108,16 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithVariant() throws Exception {
+	public void testFindDataSetWithVariant() {
 		insertDataSet();
 
 		try {
-//			DataSet resultDataSet = xpQueryService.search("findCustomerWithDynamicMaxFetchSize", makeVariantList());
-			xpQueryService.search("findCustomerWithDynamicMaxFetchSize", makeVariantList());
-		} catch (QueryServiceException e) {
+			xpQueryService.search("findCustomerWithDynamicMaxFetchSize",
+					makeVariantList());
+		} catch (QueryException e) {
 			// 7. assert
-			Assert.assertTrue("fail to compare exception", e.getCause() instanceof DataRetrievalFailureException);
+			Assert.assertTrue("fail to compare exception",
+					e.getCause() instanceof DataRetrievalFailureException);
 		}
 	}
 
@@ -126,15 +129,16 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithData() throws Exception {
+	public void testFindDataSetWithData() {
 		insertDataSet();
 
 		try {
-//			DataSet resultDataSet = xpQueryService.search("findCustomerWithDynamicMaxFetchSize", makeSelectDataSet("%12345678%"));
-			xpQueryService.search("findCustomerWithDynamicMaxFetchSize", makeSelectDataSet("%12345678%"));
-		} catch (QueryServiceException e) {
+			xpQueryService.search("findCustomerWithDynamicMaxFetchSize",
+					makeSelectDataSet("%12345678%"));
+		} catch (QueryException e) {
 			// 7. assert
-			Assert.assertTrue("fail to compare exception", e.getCause() instanceof DataRetrievalFailureException);
+			Assert.assertTrue("fail to compare exception",
+					e.getCause() instanceof DataRetrievalFailureException);
 		}
 	}
 
@@ -146,13 +150,14 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithPaging() throws Exception {
+	public void testFindDataSetWithPaging() {
 		insertDataSet();
 
 		// 테스트 데이터 1Row 추가
-		Map<String, Object> queryMap = new HashMap<String, Object>();
+		Map<String, String> queryMap = new HashMap<String, String>();
 
-		queryMap.put(XPQueryService.QUERY_INSERT, "createXPMaxfatchSizeQueryService");
+		queryMap.put(XPQueryService.QUERY_INSERT,
+				"createXPMaxfatchSizeQueryService");
 
 		DataSet insertDataSet = new DataSet("xp_insert");
 		insertDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
@@ -168,17 +173,17 @@ public class XPQueryServiceMaxFatchSizeTest {
 		insertDataSet.set(0, "NAME", "Anyframe4");
 		insertDataSet.set(0, "ADDRESS", "Seoul");
 
-//		int resultInsert = xpQueryService.update(queryMap, insertDataSet);
 		xpQueryService.update(queryMap, insertDataSet);
 
 		try {
-//			DataSet resultDataSet = xpQueryService.search("findCustomerWithDynamic", makeVariantList(), 1, 4);
-			xpQueryService.search("findCustomerWithDynamic", makeVariantList(), 1, 4);
+			xpQueryService.search("findCustomerWithDynamic", makeVariantList(),
+					1, 4);
 			Assert.fail("fail to check maxFetchSize in case of pagination");
-		} catch (QueryServiceException e) {
+		} catch (QueryException e) {
 			// 5. assert
 			e.printStackTrace();
-			Assert.assertTrue("fail to compare exception", e.getCause() instanceof DataRetrievalFailureException);
+			Assert.assertTrue("fail to compare exception",
+					e.getCause() instanceof DataRetrievalFailureException);
 		}
 	}
 
@@ -190,13 +195,14 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testFindDataSetWithPagingDataset() throws Exception {
+	public void testFindDataSetWithPagingDataset() {
 		insertDataSet();
 
 		// 테스트 데이터 1Row 추가
-		Map<String, Object> queryMap = new HashMap<String, Object>();
+		Map<String, String> queryMap = new HashMap<String, String>();
 
-		queryMap.put(XPQueryService.QUERY_INSERT, "createXPMaxfatchSizeQueryService");
+		queryMap.put(XPQueryService.QUERY_INSERT,
+				"createXPMaxfatchSizeQueryService");
 
 		DataSet insertDataSet = new DataSet("xp_insert");
 		insertDataSet.setSaveType(DataSet.SAVE_TYPE_UPDATED);
@@ -212,7 +218,6 @@ public class XPQueryServiceMaxFatchSizeTest {
 		insertDataSet.set(0, "NAME", "Anyframe4");
 		insertDataSet.set(0, "ADDRESS", "Seoul");
 
-//		int resultInsert = xpQueryService.update(queryMap, insertDataSet);
 		xpQueryService.update(queryMap, insertDataSet);
 
 		DataSet searchDataset = makeSelectDataSet("%12345678%");
@@ -222,13 +227,14 @@ public class XPQueryServiceMaxFatchSizeTest {
 		searchDataset.addConstantColumn("pageSize", DataTypes.INT, 4);
 
 		try {
-//			DataSet resultDataSet = xpQueryService.searchWithPaging("findCustomerWithDynamic", searchDataset);
-			xpQueryService.searchWithPaging("findCustomerWithDynamic", searchDataset);
+			xpQueryService.searchWithPaging("findCustomerWithDynamic",
+					searchDataset);
 			Assert.fail("fail to check maxFetchSize in case of pagination");
-		} catch (QueryServiceException e) {
+		} catch (QueryException e) {
 			// 5. assert
 			e.printStackTrace();
-			Assert.assertTrue("fail to compare exception", e.getCause() instanceof DataRetrievalFailureException);
+			Assert.assertTrue("fail to compare exception",
+					e.getCause() instanceof DataRetrievalFailureException);
 		}
 	}
 
@@ -237,9 +243,10 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * 
 	 * @throws Exception
 	 */
-	private void insertDataSet() throws Exception {
-		Map<String, Object> queryMap = new HashMap<String, Object>();
-		queryMap.put(XPQueryService.QUERY_INSERT, "createXPMaxfatchSizeQueryService");
+	private void insertDataSet() {
+		Map<String, String> queryMap = new HashMap<String, String>();
+		queryMap.put(XPQueryService.QUERY_INSERT,
+				"createXPMaxfatchSizeQueryService");
 
 		int resultInsert = xpQueryService.update(queryMap, makeInsertDataSet());
 		Assert.assertEquals("Fail to insert MiPDataSet.", 3, resultInsert);
@@ -253,31 +260,21 @@ public class XPQueryServiceMaxFatchSizeTest {
 	 * @param expected
 	 * @throws Exception
 	 */
-	private void findListDataSet(int expected) throws Exception {
-		DataSet resultDataSet = xpQueryService.search("findCustomerWithDynamic", makeSelectDataSet("%12345678%"));
-		Assert.assertEquals("Fail to find MiPDataSet.", expected, resultDataSet.getRowCount());
+	private void findListDataSet(int expected) {
+		DataSet resultDataSet = xpQueryService.search(
+				"findCustomerWithDynamic", makeSelectDataSet("%12345678%"));
+		Assert.assertEquals("Fail to find MiPDataSet.", expected, resultDataSet
+				.getRowCount());
 
 		int totalRowCount = resultDataSet.getRowCount();
 		for (int rowNum = 0; rowNum < totalRowCount; rowNum++) {
 
-			Assert.assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "ssno").startsWith("12345678"));
-			Assert.assertTrue("Fail to check result.", resultDataSet.getString(rowNum, "name").startsWith("Anyframe"));
+			Assert.assertTrue("Fail to check result.", resultDataSet.getString(
+					rowNum, "ssno").startsWith("12345678"));
+			Assert.assertTrue("Fail to check result.", resultDataSet.getString(
+					rowNum, "name").startsWith("Anyframe"));
 		}
 	}
-
-	/**
-	 * 테스트를 실행 한 후 결과값을 검증하기 위해 조회
-	 * 
-	 * @param searchKeyword
-	 * @return
-	 * @throws QueryServiceException
-	 */
-	/*private DataSet findDataSet(String searchKeyword) throws Exception {
-		DataSet resultDataSet = xpQueryService.search("findMiPQueryService", makeSelectDataSet(searchKeyword));
-		Assert.assertEquals(1, resultDataSet.getRowCount());
-
-		return resultDataSet;
-	}*/
 
 	/**
 	 * DataSet 세팅
@@ -343,5 +340,4 @@ public class XPQueryServiceMaxFatchSizeTest {
 		variableList.add("SSNO", "%12345678%");
 		return variableList;
 	}
-
 }

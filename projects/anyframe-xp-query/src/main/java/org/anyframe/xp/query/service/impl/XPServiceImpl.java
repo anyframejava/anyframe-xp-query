@@ -18,6 +18,7 @@ package org.anyframe.xp.query.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.anyframe.query.exception.QueryException;
 import org.anyframe.xp.query.impl.XPQueryServiceImpl;
 import org.anyframe.xp.query.service.XPService;
 
@@ -32,7 +33,7 @@ import com.tobesoft.xplatform.data.VariableList;
  */
 public class XPServiceImpl implements XPService {
 
-	protected XPDao xpDao;
+	protected XPDao xpDao; 
 
 	public XPServiceImpl() {
 	}
@@ -41,11 +42,13 @@ public class XPServiceImpl implements XPService {
 		this.xpDao = xpDao;
 	}
 
-	public void get(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void get(VariableList inVl, DataSetList inDl, VariableList outVl,
+			DataSetList outDl) throws Exception {
 		getList(inVl, inDl, outVl, outDl);
 	}
 
-	public void getList(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void getList(VariableList inVl, DataSetList inDl,
+			VariableList outVl, DataSetList outDl) throws Exception {
 
 		int querySetCount = getQuerySetCount(inVl, outVl);
 
@@ -59,8 +62,7 @@ public class XPServiceImpl implements XPService {
 			inDs = inDl.get("querySet" + i);
 			if (inDs != null) {
 				outDs = xpDao.getList(queryId, inDs);
-			}
-			else {
+			} else {
 				outDs = xpDao.getList(queryId, inVl);
 			}
 			outDs.setName("querySet" + i);
@@ -68,8 +70,8 @@ public class XPServiceImpl implements XPService {
 		}
 	}
 
-	public void getPagingList(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl)
-			throws Exception {
+	public void getPagingList(VariableList inVl, DataSetList inDl,
+			VariableList outVl, DataSetList outDl) throws Exception {
 
 		int querySetCount = getQuerySetCount(inVl, outVl);
 
@@ -89,50 +91,72 @@ public class XPServiceImpl implements XPService {
 		}
 	}
 
-	public void saveAll(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void saveAll(VariableList inVl, DataSetList inDl,
+			VariableList outVl, DataSetList outDl) throws Exception {
 
 		int querySetCount = getQuerySetCount(inVl, outVl);
 
 		String queryId = null;
 		DataSet inDs = null;
 
-		String[] arrQuery = null;
 		Map<String, String> queryMap = new HashMap<String, String>();
 
 		for (int i = 1; i <= querySetCount; i++) {
 
 			int returnValue = 0;
 
-			queryId = inVl.getString("querySet" + i);
 			inDs = inDl.get("querySet" + i);
-			arrQuery = queryId.split(",");
-
-			queryMap.put(XPQueryServiceImpl.QUERY_INSERT, arrQuery[0]);
-			queryMap.put(XPQueryServiceImpl.QUERY_UPDATE, arrQuery[1]);
-			queryMap.put(XPQueryServiceImpl.QUERY_DELETE, arrQuery[2]);
+			queryId = inVl.getString("querySet" + i);
+			queryMap = makeQueryMap(queryId);
 
 			returnValue = xpDao.saveAll(queryMap, inDs);
 			outVl.add("querySet" + i, String.valueOf(returnValue));
 		}
 	}
 
-	public void create(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void batchSaveAll(VariableList inVl, DataSetList inDl,
+			VariableList outVl, DataSetList outDl) throws Exception {
+		int querySetCount = getQuerySetCount(inVl, outVl);
+
+		String queryId = null;
+		DataSet inDs = null;
+
+		Map<String, String> queryMap = new HashMap<String, String>();
+
+		for (int i = 1; i <= querySetCount; i++) {
+
+			int returnValue = 0;
+
+			inDs = inDl.get("querySet" + i);
+			queryId = inVl.getString("querySet" + i);
+			queryMap = makeQueryMap(queryId);
+
+			returnValue = xpDao.batchSaveAll(queryMap, inDs);
+			outVl.add("querySet" + i, String.valueOf(returnValue));
+		}
+	}
+
+	public void create(VariableList inVl, DataSetList inDl, VariableList outVl,
+			DataSetList outDl) throws Exception {
 		String status = XPQueryServiceImpl.QUERY_INSERT;
 		save(inVl, inDl, outVl, outDl, status);
 
 	}
 
-	public void remove(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void remove(VariableList inVl, DataSetList inDl, VariableList outVl,
+			DataSetList outDl) throws Exception {
 		String status = XPQueryServiceImpl.QUERY_DELETE;
 		save(inVl, inDl, outVl, outDl, status);
 	}
 
-	public void update(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void update(VariableList inVl, DataSetList inDl, VariableList outVl,
+			DataSetList outDl) throws Exception {
 		String status = XPQueryServiceImpl.QUERY_UPDATE;
 		save(inVl, inDl, outVl, outDl, status);
 	}
 
-	public void execute(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl) throws Exception {
+	public void execute(VariableList inVl, DataSetList inDl,
+			VariableList outVl, DataSetList outDl) throws Exception {
 
 		int querySetCount = getQuerySetCount(inVl, outVl);
 
@@ -144,20 +168,38 @@ public class XPServiceImpl implements XPService {
 
 			queryId = inVl.getString("querySet" + i);
 			inDs = inDl.get("querySet" + i);
+			
 			if (inDs != null) {
-				// resultDs = xpDao.execute(queryId, inDs);
 				resultDl = xpDao.execute(queryId, inDs);
-				for (int j = 0; j < resultDl.size(); j++) {
-					outDl.add(resultDl.get(queryId + i));
-				}
-				// resultDs.setName(queryId + i);
-				// outDl.add(resultDs);
+			} else {
+				resultDl = xpDao.execute(queryId);
+			}
+			
+			for(int j = 0 ; j < resultDl.size() ; j++){
+				DataSet outDs = resultDl.get(queryId + j);
+				outDl.add(outDs);
 			}
 		}
 	}
 
-	private void save(VariableList inVl, DataSetList inDl, VariableList outVl, DataSetList outDl, String status)
-			throws Exception {
+	private Map<String, String> makeQueryMap(String queryId) throws QueryException {
+		Map<String, String> queryMap = new HashMap<String, String>();
+
+		String[] arrQuery = queryId.split(",");
+
+		if (arrQuery.length != 3)
+			throw new QueryException(
+					"XPService : saveAll method needs three query Ids for inserting, updating, deleting.");
+
+		queryMap.put(XPQueryServiceImpl.QUERY_INSERT, arrQuery[0]);
+		queryMap.put(XPQueryServiceImpl.QUERY_UPDATE, arrQuery[1]);
+		queryMap.put(XPQueryServiceImpl.QUERY_DELETE, arrQuery[2]);
+
+		return queryMap;
+	}
+
+	private void save(VariableList inVl, DataSetList inDl, VariableList outVl,
+			DataSetList outDl, String status) throws Exception {
 
 		int querySetCount = getQuerySetCount(inVl, outVl);
 
@@ -175,15 +217,14 @@ public class XPServiceImpl implements XPService {
 			queryMap.put(status, queryId);
 			if (inDs != null) {
 				returnValue = xpDao.saveAll(queryMap, inDs);
-			}
-			else {
+			} else {
 				returnValue = xpDao.update(queryId, inVl);
 			}
 			outVl.add("querySet" + i, String.valueOf(returnValue));
 		}
 	}
 
-	private int getQuerySetCount(VariableList inVl, VariableList outVl) throws Exception {
+	private int getQuerySetCount(VariableList inVl, VariableList outVl) {
 		int querySetCount = 0;
 		querySetCount = inVl.getInt("querySetCount");
 		return querySetCount;

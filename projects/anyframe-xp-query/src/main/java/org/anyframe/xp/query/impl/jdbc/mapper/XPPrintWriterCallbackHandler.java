@@ -26,48 +26,45 @@ import org.anyframe.query.QueryInfo;
 import org.anyframe.query.ria.RiaPrintWriterCallback;
 
 /**
- * Class for Print Writer XP DataSet 
+ * Class for Print Writer XP DataSet
  * 
  * @author Soyon Lim
  * @author JongHoon Kim
  */
-public class XPPrintWriterCallbackHandler extends XPCallbackSupport
-		implements RiaPrintWriterCallback {
+public class XPPrintWriterCallbackHandler extends XPCallbackSupport implements
+		RiaPrintWriterCallback { 
 
 	private String encoding = "utf-8";
 	private PrintWriter writer;
 	private int rowCount;
 	private int columnCount;
-	private int[] columnTypes;
-	private String[] fieldNames;
 	private String[] columnNames;
-	private Map<String, Integer> columnIndexMap = new HashMap<String, Integer>();
+	private final Map<String, Integer> columnIndexMap = new HashMap<String, Integer>();
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
-	
-	public String getEncoding(){
+
+	public String getEncoding() {
 		return this.encoding;
-		
+
 	}
 
-	public void setPrintWriter(PrintWriter writer){
-        this.writer = writer;
-	}
-	
-	//Default Constructor
-	 public XPPrintWriterCallbackHandler() {
-	 
-	 }
-	 
-	public XPPrintWriterCallbackHandler(PrintWriter writer,
-			QueryInfo queryInfo) {
-		 this.writer = writer;
-	     this.queryInfo = queryInfo;
+	public void setPrintWriter(PrintWriter writer) {
+		this.writer = writer;
 	}
 
-	protected short getDsType(int rsType) throws SQLException {
+	// Default Constructor
+	public XPPrintWriterCallbackHandler() {
+
+	}
+
+	public XPPrintWriterCallbackHandler(PrintWriter writer, QueryInfo queryInfo) {
+		this.writer = writer;
+		this.queryInfo = queryInfo;
+	}
+
+	protected short getDsType(int rsType) {// throws SQLException {
 		return 0;
 	}
 
@@ -76,12 +73,13 @@ public class XPPrintWriterCallbackHandler extends XPCallbackSupport
 		if (rowCount == 0) {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			columnCount = rsmd.getColumnCount();
-			columnTypes = new int[rsmd.getColumnCount()];
-			fieldNames = new String[rsmd.getColumnCount()];
+			int[] columnTypes = new int[rsmd.getColumnCount()];
+			String[] fieldNames = new String[rsmd.getColumnCount()];
 			columnNames = new String[rsmd.getColumnCount()];
 			printString = new StringBuffer();
 			for (int i = 0; i < columnCount; i++) {
-				String fieldName = getMappingStylekey(queryInfo, rsmd.getColumnLabel(i + 1));
+				String fieldName = getMappingStylekey(queryInfo, rsmd
+						.getColumnLabel(i + 1));
 				columnTypes[i] = rsmd.getColumnType(i + 1);
 				fieldNames[i] = fieldName;
 				columnIndexMap.put(columnNames[i], new Integer(i + 1));
