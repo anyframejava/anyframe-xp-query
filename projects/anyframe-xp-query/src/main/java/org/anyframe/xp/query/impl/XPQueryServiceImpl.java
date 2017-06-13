@@ -397,46 +397,30 @@ public class XPQueryServiceImpl extends AbstractRiaQueryService implements
 		
 		if (callableStatementCallbackHandler == null) {
 			callableStatementCallbackHandler = new XPCallableStatementCallbackHandler();
-		}
+        }
 
 		ColumnValueExtractor columnValueExtractor = new ColumnValueExtractor() {
-			public Object getValue(DataSet dataset, int rowNum,
-					String columnName) {
+			public Object getValue(DataSet dataset, int rowNum, String columnName) {
 				return dataset.getObject(rowNum, columnName);
 			}
 		};
 
-		// 조회 조건이 없을 경우 Dataset Id는 queryId + 0
-		if (dataSet == null || dataSet.getRowCount() == 0) {
-			dataSet = new DataSet();
-			DataSetList resultDl = (DataSetList) this.execute(queryId,
-					new XPDataSetSQLParameterSource(dataSet, 0,
-							columnValueExtractor),
-					callableStatementCallbackHandler);
-			if (resultDl != null) {
-				for (int j = 0; j < resultDl.size(); j++) {
-					DataSet outDs = resultDl.get(j);
-					outDs.setName(outDs.getName() + 0);
-					datasetList.add(outDs);
-				}
-			}
-		} else {
-			// input Dataset여러 row일 경우 각 row의 실행 결과 Dataset Id는 queryId + row가
-			// 된다.
-			for (int i = 0; i < dataSet.getRowCount(); i++) {
-				DataSetList resultDl = (DataSetList) this.execute(queryId,
-						new XPDataSetSQLParameterSource(dataSet, i,
-								columnValueExtractor),
-						callableStatementCallbackHandler);
-				if (resultDl != null) {
-					for (int j = 0; j < resultDl.size(); j++) {
-						DataSet outDs = resultDl.get(j);
-						outDs.setName(outDs.getName() + i);
-						datasetList.add(outDs);
-					}
-				}
-			}
-		}
+        // Procedure의 Result Dataset의 이름은 매핑 쿼리에 정의한 OUT Parameter 이름이다.
+        // dataSet의 Row 가 없는 경우는 execute 메소드 내부에서 columnValueExtrator를 호출하지 않는다.
+
+        DataSetList resultDl = (DataSetList) this.execute(queryId,
+                new XPDataSetSQLParameterSource(dataSet, 0,
+                        columnValueExtractor),
+                callableStatementCallbackHandler);
+
+        if (resultDl != null) {
+            for (int j = 0; j < resultDl.size(); j++) {
+                DataSet outDs = resultDl.get(j);
+                outDs.setName(outDs.getName());
+                datasetList.add(outDs);
+            }
+        }
+
 		return datasetList;
 	}
 

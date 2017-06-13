@@ -103,10 +103,7 @@ public class XPQueryServiceProcedureTest {
 
 		inDs.newRow();
 		inDs.set(0, "inVal", "XPQueryService Procedure Test");
-		
-		inDs.newRow();
-		inDs.set(1, "inVal", "XPQueryService Procedure Test2");
-		
+
 		DataSetList outDl = null;
 
 		try {
@@ -115,12 +112,13 @@ public class XPQueryServiceProcedureTest {
 			e.printStackTrace();
 		}
 		
-		Assert.assertEquals(4, outDl.size());
+		Assert.assertEquals(2, outDl.size());
 		
-		DataSet outDs = outDl.get("outVal10");
+		DataSet outDs1 = outDl.get("outVal1");
+        DataSet outDs2 = outDl.get("outVal2");
 
-		Assert.assertTrue("Fail to execute function.", outDs.getRowCount() == 1);
+		Assert.assertTrue("Fail to execute function.", outDs1.getRowCount() == 1);
 		Assert.assertEquals("Fail to compare class type of outVal.",
-				DataTypes.STRING, outDs.getColumn(0).getDataType());
+				DataTypes.STRING, outDs1.getColumn(0).getDataType());
 	}
 }

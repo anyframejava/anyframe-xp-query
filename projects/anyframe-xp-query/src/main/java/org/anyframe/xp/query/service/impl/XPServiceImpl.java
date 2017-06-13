@@ -33,7 +33,8 @@ import com.tobesoft.xplatform.data.VariableList;
  */
 public class XPServiceImpl implements XPService {
 
-	protected XPDao xpDao; 
+	protected XPDao xpDao;
+    private static final String OUT_QUERY_NAME_PREFIX = "querySet";
 
 	public XPServiceImpl() {
 	}
@@ -58,14 +59,15 @@ public class XPServiceImpl implements XPService {
 
 		for (int i = 1; i <= querySetCount; i++) {
 
-			queryId = inVl.getString("querySet" + i);
-			inDs = inDl.get("querySet" + i);
+
+            queryId = inVl.getString(OUT_QUERY_NAME_PREFIX + i);
+			inDs = inDl.get(OUT_QUERY_NAME_PREFIX + i);
 			if (inDs != null) {
 				outDs = xpDao.getList(queryId, inDs);
 			} else {
 				outDs = xpDao.getList(queryId, inVl);
 			}
-			outDs.setName("querySet" + i);
+			outDs.setName(OUT_QUERY_NAME_PREFIX + i);
 			outDl.add(outDs);
 		}
 	}
@@ -81,12 +83,12 @@ public class XPServiceImpl implements XPService {
 
 		for (int i = 1; i <= querySetCount; i++) {
 
-			queryId = inVl.getString("querySet" + i);
-			inDs = inDl.get("querySet" + i);
+			queryId = inVl.getString(OUT_QUERY_NAME_PREFIX + i);
+			inDs = inDl.get(OUT_QUERY_NAME_PREFIX + i);
 			if (inDs != null) {
 				outDs = xpDao.getPagingList(queryId, inDs);
 			}
-			outDs.setName("querySet" + i);
+			outDs.setName(OUT_QUERY_NAME_PREFIX + i);
 			outDl.add(outDs);
 		}
 	}
@@ -105,12 +107,12 @@ public class XPServiceImpl implements XPService {
 
 			int returnValue = 0;
 
-			inDs = inDl.get("querySet" + i);
-			queryId = inVl.getString("querySet" + i);
+			inDs = inDl.get(OUT_QUERY_NAME_PREFIX + i);
+			queryId = inVl.getString(OUT_QUERY_NAME_PREFIX + i);
 			queryMap = makeQueryMap(queryId);
 
 			returnValue = xpDao.saveAll(queryMap, inDs);
-			outVl.add("querySet" + i, String.valueOf(returnValue));
+			outVl.add(OUT_QUERY_NAME_PREFIX + i, String.valueOf(returnValue));
 		}
 	}
 
@@ -127,12 +129,12 @@ public class XPServiceImpl implements XPService {
 
 			int returnValue = 0;
 
-			inDs = inDl.get("querySet" + i);
-			queryId = inVl.getString("querySet" + i);
+			inDs = inDl.get(OUT_QUERY_NAME_PREFIX + i);
+			queryId = inVl.getString(OUT_QUERY_NAME_PREFIX + i);
 			queryMap = makeQueryMap(queryId);
 
 			returnValue = xpDao.batchSaveAll(queryMap, inDs);
-			outVl.add("querySet" + i, String.valueOf(returnValue));
+			outVl.add(OUT_QUERY_NAME_PREFIX + i, String.valueOf(returnValue));
 		}
 	}
 
@@ -158,25 +160,22 @@ public class XPServiceImpl implements XPService {
 	public void execute(VariableList inVl, DataSetList inDl,
 			VariableList outVl, DataSetList outDl) throws Exception {
 
-		int querySetCount = getQuerySetCount(inVl, outVl);
+		for (int i = 1; i <= getQuerySetCount(inVl, outVl); i++) {
+            String querySet = OUT_QUERY_NAME_PREFIX + i;
+			String queryId = inVl.getString(querySet);
+			DataSet inDs = inDl.get(querySet);
 
-		String queryId = null;
-		DataSet inDs = null;
-		// DataSet resultDs = null;
-		DataSetList resultDl = null;
-		for (int i = 1; i <= querySetCount; i++) {
-
-			queryId = inVl.getString("querySet" + i);
-			inDs = inDl.get("querySet" + i);
-			
+            DataSetList resultDl = null;
 			if (inDs != null) {
-				resultDl = xpDao.execute(queryId, inDs);
+                resultDl = xpDao.execute(queryId, inDs);
 			} else {
-				resultDl = xpDao.execute(queryId);
+                resultDl = xpDao.execute(queryId);
 			}
-			
+
 			for(int j = 0 ; j < resultDl.size() ; j++){
-				DataSet outDs = resultDl.get(queryId + j);
+				DataSet outDs = resultDl.get(j);
+                //프로시저의 경우 output DataSet의 이름은 querySet1_outParamName
+                outDs.setName(querySet +  "_" + outDs.getName());
 				outDl.add(outDs);
 			}
 		}
@@ -210,8 +209,8 @@ public class XPServiceImpl implements XPService {
 
 			int returnValue = 0;
 
-			queryId = inVl.getString("querySet" + i);
-			inDs = inDl.get("querySet" + i);
+			queryId = inVl.getString(OUT_QUERY_NAME_PREFIX + i);
+			inDs = inDl.get(OUT_QUERY_NAME_PREFIX + i);
 
 			Map<String, String> queryMap = new HashMap<String, String>();
 			queryMap.put(status, queryId);
@@ -220,7 +219,7 @@ public class XPServiceImpl implements XPService {
 			} else {
 				returnValue = xpDao.update(queryId, inVl);
 			}
-			outVl.add("querySet" + i, String.valueOf(returnValue));
+			outVl.add(OUT_QUERY_NAME_PREFIX + i, String.valueOf(returnValue));
 		}
 	}
 
