@@ -129,8 +129,12 @@ public class XPController extends AbstractController {
 			}
 		} catch (Exception e) {
 			logger.error("Can not invoke a dispatch method name", e);
-
-			String msg = e.getMessage();
+			
+			String msg = null;
+			Throwable cause = e.getCause();
+			if(cause != null) {
+				msg=cause.getMessage();
+			}
 
 			if (msg == null)
 				msg = "Fail to process client request.";
