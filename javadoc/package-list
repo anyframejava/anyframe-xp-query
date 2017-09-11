@@ -1,0 +1,11 @@
+org.anyframe.xp.query
+org.anyframe.xp.query.impl
+org.anyframe.xp.query.impl.jdbc.mapper
+org.anyframe.xp.query.impl.jdbc.setter
+org.anyframe.xp.query.service
+org.anyframe.xp.query.service.impl
+org.anyframe.xp.query.util
+org.anyframe.xp.query.web
+org.anyframe.xp.query.web.controller
+org.anyframe.xp.query.web.converter
+org.anyframe.xp.query.web.handler
